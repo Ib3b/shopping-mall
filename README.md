@@ -1,7 +1,7 @@
-# 🛒 Shopping Mall
+# Claude示例开发工程
 
 <p align="center">
-  <b>Spring Boot 3.2 网购商城 REST API 示例工程</b>
+  <b>Spring Boot 3.5 多模块示例工程</b>
 </p>
 
 <p align="center">
@@ -14,12 +14,21 @@
   <a href="https://github.com/Ib3b/shopping-mall/releases">
     <img src="https://img.shields.io/github/v/release/Ib3b/shopping-mall?style=flat-square&logo=github" alt="Release">
   </a>
-  <img src="https://img.shields.io/badge/Spring%20Boot-3.2.5-6DB33F?style=flat-square&logo=springboot" alt="Spring Boot">
+  <img src="https://img.shields.io/badge/Spring%20Boot-3.5.11-6DB33F?style=flat-square&logo=springboot" alt="Spring Boot">
   <img src="https://img.shields.io/badge/JDK-21-007396?style=flat-square&logo=openjdk" alt="JDK">
   <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License">
 </p>
 
 ---
+
+## 项目结构
+
+```
+shopping-mall/
+├── pom.xml              # 父 POM
+├── shopping-mall-app/   # 主应用模块（网购商城 REST API）
+└── mystarter/           # 自定义 Starter 示例模块
+```
 
 ## ✨ 功能特性
 
@@ -30,11 +39,16 @@
 | 📑 订单 | 创建订单、自动扣库存、状态流转 |
 | 📧 邮件 | 异步模拟发送 |
 | 📖 文档 | Swagger UI |
+| 🔧 Starter | 自定义 Spring Boot Starter 示例 |
 
 ## 🚀 快速开始
 
 ```bash
+# 构建所有模块
+mvn clean package
+
 # 启动应用
+cd shopping-mall-app
 mvn spring-boot:run
 
 # 运行测试

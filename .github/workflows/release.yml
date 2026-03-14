@@ -47,7 +47,7 @@ jobs:
             ```bash
             java -jar shopping-mall-${{ steps.version.outputs.VERSION }}.jar
             ```
-          files: target/shopping-mall-*.jar
+          files: shopping-mall-app/target/shopping-mall-*.jar
           generate_release_notes: true
 
       - name: Publish to GitHub Packages
