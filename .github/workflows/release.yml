@@ -41,13 +41,13 @@ jobs:
             ## 🚀 Release ${{ steps.version.outputs.VERSION }}
 
             ### 📦 Downloads
-            - JAR: `shopping-mall-${{ steps.version.outputs.VERSION }}.jar`
+            - JAR: `app-${{ steps.version.outputs.VERSION }}.jar`
 
             ### 🔗 Quick Start
             ```bash
-            java -jar shopping-mall-${{ steps.version.outputs.VERSION }}.jar
+            java -jar app-${{ steps.version.outputs.VERSION }}.jar
             ```
-          files: shopping-mall-app/target/shopping-mall-*.jar
+          files: app/target/app-*.jar
           generate_release_notes: true
 
       - name: Publish to GitHub Packages
