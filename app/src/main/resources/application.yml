@@ -37,12 +37,7 @@ spring:
     caffeine:
       spec: maximumSize=1000,expireAfterWrite=300s
   
-  mail:
-    host: localhost
-    port: 25
-    username: noreply@shopping-mall.com
-
-server:
+  server:
   port: 8080
 
 springdoc:

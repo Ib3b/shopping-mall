@@ -16,7 +16,7 @@
     <artifactId>shopping-mall-parent</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
-    <name>Claude示例开发工程</name>
+    <name>claude-train</name>
     <description>Spring Boot 多模块示例工程</description>
     <url>https://github.com/Ib3b/shopping-mall</url>
 
@@ -50,11 +50,7 @@
     </properties>
 
     <modules>
-        <module>common</module>
-        <module>user</module>
-        <module>product</module>
-        <module>order</module>
-        <module>mystarter</module>
+        <module>starter</module>
         <module>facade</module>
         <module>domain</module>
         <module>web</module>

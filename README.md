@@ -27,11 +27,21 @@
 shopping-mall/
 ├── pom.xml       # 父 POM
 ├── common/       # 公共模块（实体、DTO、异常、Repository）
-├── user/         # 用户模块（用户服务与控制器）
-├── product/      # 商品模块（商品服务与控制器）
-├── order/        # 订单模块（订单服务、控制器、邮件）
+├── facade/       # RPC 服务接口层（二方包，仅接口定义）
+├── user/         # 用户模块（用户服务）
+├── product/      # 商品模块（商品服务）
+├── order/        # 订单模块（订单服务、邮件服务）
 ├── mystarter/    # 自定义 Starter 示例
+├── web/          # HTTP 接口层（Controller + RPC 实现）
 └── app/          # 主应用入口
+```
+
+### 模块依赖关系
+```
+app -> web -> facade, user, product, order, mystarter
+                \-> common
+facade -> common
+user/product/order -> common
 ```
 
 ## ✨ 功能特性

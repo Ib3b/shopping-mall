@@ -26,7 +26,7 @@
 
         <dependency>
             <groupId>io.github.ib3b</groupId>
-            <artifactId>mystarter</artifactId>
+            <artifactId>starter</artifactId>
             <version>${project.version}</version>
         </dependency>
 

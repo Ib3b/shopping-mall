@@ -1,6 +1,6 @@
 package com.example.shopping.web.controller;
 
-import com.example.mystarter.GreetingService;
+import com.example.starter.GreetingService;
 import org.springframework.web.bind.annotation.*;
 
 /**
