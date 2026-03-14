@@ -35,33 +35,33 @@ shopping-mall/
 ### 模块依赖关系
 
 ```
- ┌───────────────────────────────────────────────────────────────┐
- │                                                               │
- │    底层                          上层                         │
- │                                                               │
- │   ┌─────────┐               ┌─────────┐                       │
- │   │ facade  │               │ starter │   ← 无项目依赖        │
- │   └────┬────┘               └────┬────┘                       │
- │        │                         │                            │
- │        │  实现                   │  引用                      │
- │        ▼                         │                            │
- │   ┌─────────┐                    │                            │
- │   │ domain  │                    │                            │
- │   └────┬────┘                    │                            │
- │        │                         │                            │
- │        └──────────┬──────────────┘                            │
- │                   │                                           │
- │                   ▼                                           │
- │              ┌─────────┐                                      │
- │              │   web   │                                      │
- │              └────┬────┘                                      │
- │                   │                                           │
- │                   ▼                                           │
- │              ┌─────────┐                                      │
- │              │   app   │   ← 主应用入口                       │
- │              └─────────┘                                      │
- │                                                               │
- └───────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│    底层                            上层                         │
+│                                                                 │
+│   ┌─────────┐                 ┌─────────┐                       │
+│   │ facade  │                 │ starter │    ← 无项目依赖       │
+│   └────┬────┘                 └────┬────┘                       │
+│        │                           │                            │
+│        │ 实现                      │ 引用                       │
+│        ▼                           │                            │
+│   ┌─────────┐                      │                            │
+│   │ domain  │                      │                            │
+│   └────┬────┘                      │                            │
+│        │                           │                            │
+│        └─────────────┬─────────────┘                            │
+│                      │                                          │
+│                      ▼                                          │
+│                 ┌─────────┐                                     │
+│                 │   web   │                                     │
+│                 └────┬────┘                                     │
+│                      │                                          │
+│                      ▼                                          │
+│                 ┌─────────┐                                     │
+│                 │   app   │    ← 主应用入口                     │
+│                 └─────────┘                                     │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### 模块职责
@@ -117,48 +117,60 @@ mvn test
 
 ## API 端点
 
-### 用户管理 `/api/users`
+<details>
+<summary><b>👤 用户管理</b> <code>/api/users</code></summary>
 
 | 方法 | 端点 | 说明 | 请求体 | 响应 |
 |:----:|------|------|--------|------|
-| POST | `/api/users` | 创建用户 | `UserCreateRequest` | `UserDTO` |
-| GET | `/api/users` | 分页获取用户列表 | - | `Page<UserResponse>` |
-| GET | `/api/users/{id}` | 根据 ID 获取用户 | - | `UserDTO` |
-| GET | `/api/users/username/{username}` | 根据用户名获取用户 | - | `UserDTO` |
-| PUT | `/api/users/{id}` | 更新用户 | `UserUpdateRequest` | `UserDTO` |
-| DELETE | `/api/users/{id}` | 删除用户 | - | 204 No Content |
+| <img src="https://img.shields.io/badge/POST-201-green?style=flat-square" alt="POST"/> | `/api/users` | 创建用户 | `UserCreateRequest` | `UserDTO` |
+| <img src="https://img.shields.io/badge/GET-200-blue?style=flat-square" alt="GET"/> | `/api/users` | 分页获取用户列表 | - | `Page<UserResponse>` |
+| <img src="https://img.shields.io/badge/GET-200-blue?style=flat-square" alt="GET"/> | `/api/users/{id}` | 根据 ID 获取用户 | - | `UserDTO` |
+| <img src="https://img.shields.io/badge/GET-200-blue?style=flat-square" alt="GET"/> | `/api/users/username/{username}` | 根据用户名获取用户 | - | `UserDTO` |
+| <img src="https://img.shields.io/badge/PUT-200-orange?style=flat-square" alt="PUT"/> | `/api/users/{id}` | 更新用户 | `UserUpdateRequest` | `UserDTO` |
+| <img src="https://img.shields.io/badge/DELETE-204-red?style=flat-square" alt="DELETE"/> | `/api/users/{id}` | 删除用户 | - | 204 No Content |
 
-### 商品管理 `/api/products`
+</details>
 
-| 方法 | 端点 | 说明 | 请求体 | 响应 |
-|:----:|------|------|--------|------|
-| POST | `/api/products` | 创建商品 | `ProductCreateRequest` | `ProductDTO` |
-| GET | `/api/products` | 分页获取商品列表 | - | `Page<ProductResponse>` |
-| GET | `/api/products/{id}` | 根据 ID 获取商品 | - | `ProductDTO` |
-| GET | `/api/products/category/{category}` | 按分类查询商品 | - | `List<ProductDTO>` |
-| GET | `/api/products/search?keyword=` | 搜索商品 | - | `List<ProductDTO>` |
-| GET | `/api/products/in-stock` | 获取有库存商品 | - | `List<ProductDTO>` |
-| PUT | `/api/products/{id}` | 更新商品 | `ProductUpdateRequest` | `ProductDTO` |
-| DELETE | `/api/products/{id}` | 删除商品 | - | 204 No Content |
-
-### 订单管理 `/api/orders`
+<details>
+<summary><b>📦 商品管理</b> <code>/api/products</code></summary>
 
 | 方法 | 端点 | 说明 | 请求体 | 响应 |
 |:----:|------|------|--------|------|
-| POST | `/api/orders` | 创建订单（自动扣库存） | `OrderCreateRequest` | `OrderDTO` |
-| GET | `/api/orders` | 分页获取订单列表 | - | `Page<OrderResponse>` |
-| GET | `/api/orders/{id}` | 根据 ID 获取订单 | - | `OrderDTO` |
-| GET | `/api/orders/user/{userId}` | 获取用户订单列表 | - | `List<OrderDTO>` |
-| GET | `/api/orders/user/{userId}/count` | 获取用户订单数量 | - | `Long` |
-| GET | `/api/orders/status/{status}` | 按状态查询订单 | - | `List<OrderDTO>` |
-| PUT | `/api/orders/{id}/status?status=` | 更新订单状态 | - | `OrderDTO` |
-| POST | `/api/orders/{id}/cancel` | 取消订单（恢复库存） | - | `OrderDTO` |
+| <img src="https://img.shields.io/badge/POST-201-green?style=flat-square" alt="POST"/> | `/api/products` | 创建商品 | `ProductCreateRequest` | `ProductDTO` |
+| <img src="https://img.shields.io/badge/GET-200-blue?style=flat-square" alt="GET"/> | `/api/products` | 分页获取商品列表 | - | `Page<ProductResponse>` |
+| <img src="https://img.shields.io/badge/GET-200-blue?style=flat-square" alt="GET"/> | `/api/products/{id}` | 根据 ID 获取商品 | - | `ProductDTO` |
+| <img src="https://img.shields.io/badge/GET-200-blue?style=flat-square" alt="GET"/> | `/api/products/category/{category}` | 按分类查询商品 | - | `List<ProductDTO>` |
+| <img src="https://img.shields.io/badge/GET-200-blue?style=flat-square" alt="GET"/> | `/api/products/search?keyword=` | 搜索商品 | - | `List<ProductDTO>` |
+| <img src="https://img.shields.io/badge/GET-200-blue?style=flat-square" alt="GET"/> | `/api/products/in-stock` | 获取有库存商品 | - | `List<ProductDTO>` |
+| <img src="https://img.shields.io/badge/PUT-200-orange?style=flat-square" alt="PUT"/> | `/api/products/{id}` | 更新商品 | `ProductUpdateRequest` | `ProductDTO` |
+| <img src="https://img.shields.io/badge/DELETE-204-red?style=flat-square" alt="DELETE"/> | `/api/products/{id}` | 删除商品 | - | 204 No Content |
 
-### 问候服务 `/api/greeting`
+</details>
+
+<details>
+<summary><b>📑 订单管理</b> <code>/api/orders</code></summary>
+
+| 方法 | 端点 | 说明 | 请求体 | 响应 |
+|:----:|------|------|--------|------|
+| <img src="https://img.shields.io/badge/POST-201-green?style=flat-square" alt="POST"/> | `/api/orders` | 创建订单（自动扣库存） | `OrderCreateRequest` | `OrderDTO` |
+| <img src="https://img.shields.io/badge/GET-200-blue?style=flat-square" alt="GET"/> | `/api/orders` | 分页获取订单列表 | - | `Page<OrderResponse>` |
+| <img src="https://img.shields.io/badge/GET-200-blue?style=flat-square" alt="GET"/> | `/api/orders/{id}` | 根据 ID 获取订单 | - | `OrderDTO` |
+| <img src="https://img.shields.io/badge/GET-200-blue?style=flat-square" alt="GET"/> | `/api/orders/user/{userId}` | 获取用户订单列表 | - | `List<OrderDTO>` |
+| <img src="https://img.shields.io/badge/GET-200-blue?style=flat-square" alt="GET"/> | `/api/orders/user/{userId}/count` | 获取用户订单数量 | - | `Long` |
+| <img src="https://img.shields.io/badge/GET-200-blue?style=flat-square" alt="GET"/> | `/api/orders/status/{status}` | 按状态查询订单 | - | `List<OrderDTO>` |
+| <img src="https://img.shields.io/badge/PUT-200-orange?style=flat-square" alt="PUT"/> | `/api/orders/{id}/status?status=` | 更新订单状态 | - | `OrderDTO` |
+| <img src="https://img.shields.io/badge/POST-200-green?style=flat-square" alt="POST"/> | `/api/orders/{id}/cancel` | 取消订单（恢复库存） | - | `OrderDTO` |
+
+</details>
+
+<details>
+<summary><b>👋 问候服务</b> <code>/api/greeting</code></summary>
 
 | 方法 | 端点 | 说明 | 参数 | 响应 |
 |:----:|------|------|------|------|
-| GET | `/api/greeting` | 问候接口（Starter 演示） | `name` (可选) | `String` |
+| <img src="https://img.shields.io/badge/GET-200-blue?style=flat-square" alt="GET"/> | `/api/greeting` | 问候接口（Starter 演示） | `name` (可选) | `String` |
+
+</details>
 
 ## 运行要求
 
