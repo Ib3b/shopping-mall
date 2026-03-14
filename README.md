@@ -25,51 +25,91 @@
 
 ```
 shopping-mall/
-├── pom.xml       # 父 POM
-├── common/       # 公共模块（实体、DTO、异常、Repository）
-├── facade/       # RPC 服务接口层（二方包，仅接口定义）
-├── user/         # 用户模块（用户服务）
-├── product/      # 商品模块（商品服务）
-├── order/        # 订单模块（订单服务、邮件服务）
-├── mystarter/    # 自定义 Starter 示例
-├── web/          # HTTP 接口层（Controller + RPC 实现）
+├── facade/       # RPC 服务接口层（二方包，无依赖）
+├── domain/       # 业务领域层（聚合所有业务代码）
+├── starter/      # 自定义 Spring Boot Starter
+├── web/          # HTTP 接口层（Controller）
 └── app/          # 主应用入口
 ```
 
 ### 模块依赖关系
-```
-app -> web -> facade, user, product, order, mystarter
-                \-> common
-facade -> common
-user/product/order -> common
-```
 
-## ✨ 功能特性
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 280">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#6DB33F;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#6DB33F;stop-opacity:0.1"/>
+    </linearGradient>
+  </defs>
 
-| 模块 | 功能 |
+  <!-- Nodes -->
+  <rect x="160" y="10" width="80" height="40" rx="6" fill="#E8F5E9" stroke="#6DB33F" stroke-width="2"/>
+  <text x="200" y="35" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#2E7D32">app</text>
+
+  <rect x="160" y="70" width="80" height="40" rx="6" fill="#E8F5E9" stroke="#6DB33F" stroke-width="2"/>
+  <text x="200" y="95" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#2E7D32">web</text>
+
+  <rect x="160" y="130" width="80" height="40" rx="6" fill="#E8F5E9" stroke="#6DB33F" stroke-width="2"/>
+  <text x="200" y="155" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#2E7D32">domain</text>
+
+  <rect x="160" y="190" width="80" height="40" rx="6" fill="#E8F5E9" stroke="#6DB33F" stroke-width="2"/>
+  <text x="200" y="215" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#2E7D32">facade</text>
+
+  <rect x="60" y="130" width="70" height="40" rx="6" fill="#FFF3E0" stroke="#FF9800" stroke-width="2"/>
+  <text x="95" y="155" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#E65100">starter</text>
+
+  <!-- Arrows -->
+  <line x1="200" y1="50" x2="200" y2="70" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="200" y1="110" x2="200" y2="130" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="200" y1="170" x2="200" y2="190" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="130" y1="90" x2="160" y2="115" stroke="#FF9800" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arrowOrange)"/>
+  <line x1="130" y1="30" x2="160" y2="30" stroke="#FF9800" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arrowOrange)"/>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#666"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#FF9800"/>
+    </marker>
+  </defs>
+</svg>
+
+### 模块职责
+
+| 模块 | 职责 | 依赖 |
+|:----:|------|------|
+| **facade** | RPC 接口定义层，纯接口和 DTO，可独立发布为二方包 | 无 |
+| **domain** | 业务领域层，包含 Entity、Repository、Service 和 RpcService 实现 | facade |
+| **starter** | 自定义 Spring Boot Starter 示例 | spring-boot-starter |
+| **web** | HTTP 接口层，包含所有 Controller | domain, starter |
+| **app** | 主应用入口，启动配置 | web, starter |
+
+## 功能特性
+
+| 功能 | 说明 |
 |:----:|------|
-| 👤 用户 | 注册、查询 |
-| 📦 商品 | CRUD、库存管理、缓存 |
-| 📑 订单 | 创建订单、自动扣库存、状态流转 |
-| 📧 邮件 | 异步模拟发送 |
-| 📖 文档 | Swagger UI |
-| 🔧 Starter | 自定义 Spring Boot Starter 示例 |
+| 👤 用户管理 | 注册、查询、更新、删除 |
+| 📦 商品管理 | CRUD、库存管理、分类查询、搜索、缓存 |
+| 📑 订单管理 | 创建订单、自动扣库存、状态流转、取消恢复库存 |
+| 📧 邮件服务 | 异步模拟发送 |
+| 📖 API 文档 | Swagger UI |
+| 🔧 自定义 Starter | 演示 Spring Boot Starter 开发 |
 
-## 🚀 快速开始
+## 快速开始
 
 ```bash
-# 构建所有模块
+# 构建项目
 mvn clean package
 
 # 启动应用
-cd app
-mvn spring-boot:run
+cd app && mvn spring-boot:run
 
 # 运行测试
 mvn test
 ```
 
-## 📦 使用 GitHub Packages
+## 使用 GitHub Packages
 
 ```xml
 <dependency>
@@ -79,52 +119,59 @@ mvn test
 </dependency>
 ```
 
-## 🔗 访问地址
+## 访问地址
 
 | 服务 | 地址 |
 |------|------|
 | API | http://localhost:8080 |
-| Swagger | http://localhost:8080/swagger-ui.html |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
 
-## 📌 API 端点
+## API 端点
 
-<details>
-<summary><b>用户管理</b></summary>
+### 用户管理 `/api/users`
 
-```
-GET    /api/users           # 获取所有用户
-GET    /api/users/{id}      # 获取用户
-POST   /api/users           # 创建用户
-```
-</details>
+| 方法 | 端点 | 说明 | 请求体 | 响应 |
+|:----:|------|------|--------|------|
+| POST | `/api/users` | 创建用户 | `UserCreateRequest` | `UserDTO` |
+| GET | `/api/users` | 分页获取用户列表 | - | `Page<UserResponse>` |
+| GET | `/api/users/{id}` | 根据 ID 获取用户 | - | `UserDTO` |
+| GET | `/api/users/username/{username}` | 根据用户名获取用户 | - | `UserDTO` |
+| PUT | `/api/users/{id}` | 更新用户 | `UserUpdateRequest` | `UserDTO` |
+| DELETE | `/api/users/{id}` | 删除用户 | - | 204 No Content |
 
-<details>
-<summary><b>商品管理</b></summary>
+### 商品管理 `/api/products`
 
-```
-GET    /api/products                    # 获取所有商品
-GET    /api/products/{id}               # 获取商品
-GET    /api/products/category/{cat}     # 按分类查询
-POST   /api/products                    # 创建商品
-PUT    /api/products/{id}               # 更新商品
-DELETE /api/products/{id}               # 删除商品
-```
-</details>
+| 方法 | 端点 | 说明 | 请求体 | 响应 |
+|:----:|------|------|--------|------|
+| POST | `/api/products` | 创建商品 | `ProductCreateRequest` | `ProductDTO` |
+| GET | `/api/products` | 分页获取商品列表 | - | `Page<ProductResponse>` |
+| GET | `/api/products/{id}` | 根据 ID 获取商品 | - | `ProductDTO` |
+| GET | `/api/products/category/{category}` | 按分类查询商品 | - | `List<ProductDTO>` |
+| GET | `/api/products/search?keyword=` | 搜索商品 | - | `List<ProductDTO>` |
+| GET | `/api/products/in-stock` | 获取有库存商品 | - | `List<ProductDTO>` |
+| PUT | `/api/products/{id}` | 更新商品 | `ProductUpdateRequest` | `ProductDTO` |
+| DELETE | `/api/products/{id}` | 删除商品 | - | 204 No Content |
 
-<details>
-<summary><b>订单管理</b></summary>
+### 订单管理 `/api/orders`
 
-```
-GET    /api/orders                    # 获取所有订单
-GET    /api/orders/{id}               # 获取订单
-GET    /api/orders/user/{userId}      # 获取用户订单
-POST   /api/orders                    # 创建订单（自动扣库存）
-PUT    /api/orders/{id}/status        # 更新订单状态
-POST   /api/orders/{id}/cancel        # 取消订单
-```
-</details>
+| 方法 | 端点 | 说明 | 请求体 | 响应 |
+|:----:|------|------|--------|------|
+| POST | `/api/orders` | 创建订单（自动扣库存） | `OrderCreateRequest` | `OrderDTO` |
+| GET | `/api/orders` | 分页获取订单列表 | - | `Page<OrderResponse>` |
+| GET | `/api/orders/{id}` | 根据 ID 获取订单 | - | `OrderDTO` |
+| GET | `/api/orders/user/{userId}` | 获取用户订单列表 | - | `List<OrderDTO>` |
+| GET | `/api/orders/user/{userId}/count` | 获取用户订单数量 | - | `Long` |
+| GET | `/api/orders/status/{status}` | 按状态查询订单 | - | `List<OrderDTO>` |
+| PUT | `/api/orders/{id}/status?status=` | 更新订单状态 | - | `OrderDTO` |
+| POST | `/api/orders/{id}/cancel` | 取消订单（恢复库存） | - | `OrderDTO` |
 
-## 📋 运行要求
+### 问候服务 `/api/greeting`
+
+| 方法 | 端点 | 说明 | 参数 | 响应 |
+|:----:|------|------|------|------|
+| GET | `/api/greeting` | 问候接口（Starter 演示） | `name` (可选) | `String` |
+
+## 运行要求
 
 - JDK 21+
 - Maven 3.6+
