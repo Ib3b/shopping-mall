@@ -14,7 +14,7 @@
 
     <groupId>io.github.ib3b</groupId>
     <artifactId>shopping-mall-parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.2</version>
     <packaging>pom</packaging>
     <name>claude-train</name>
     <description>Spring Boot 多模块示例工程</description>

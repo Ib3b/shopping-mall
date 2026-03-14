@@ -34,34 +34,18 @@ shopping-mall/
 
 ### 模块依赖关系
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                                                                 │
-│    底层                            上层                         │
-│                                                                 │
-│   ┌─────────┐                 ┌─────────┐                       │
-│   │ facade  │                 │ starter │    ← 无项目依赖       │
-│   └────┬────┘                 └────┬────┘                       │
-│        │                           │                            │
-│        │ 实现                      │ 引用                       │
-│        ▼                           │                            │
-│   ┌─────────┐                      │                            │
-│   │ domain  │                      │                            │
-│   └────┬────┘                      │                            │
-│        │                           │                            │
-│        └─────────────┬─────────────┘                            │
-│                      │                                          │
-│                      ▼                                          │
-│                 ┌─────────┐                                     │
-│                 │   web   │                                     │
-│                 └────┬────┘                                     │
-│                      │                                          │
-│                      ▼                                          │
-│                 ┌─────────┐                                     │
-│                 │   app   │    ← 主应用入口                     │
-│                 └─────────┘                                     │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    facade["facade<br/>RPC 接口层"] --> domain["domain<br/>业务领域层"]
+    starter["starter<br/>自定义 Starter"] --> domain
+    domain --> web["web<br/>HTTP 接口层"]
+    web --> app["app<br/>主应用入口"]
+
+    style facade fill:#E8F5E9,stroke:#81C784,color:#2E7D32
+    style starter fill:#FFF8E1,stroke:#FFD54F,color:#F57C00
+    style domain fill:#E3F2FD,stroke:#64B5F6,color:#1565C0
+    style web fill:#F3E5F5,stroke:#BA68C8,color:#7B1FA2
+    style app fill:#FFEBEE,stroke:#EF9A9A,color:#C62828
 ```
 
 ### 模块职责
