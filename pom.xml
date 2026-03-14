@@ -50,8 +50,12 @@
     </properties>
 
     <modules>
+        <module>common</module>
+        <module>user</module>
+        <module>product</module>
+        <module>order</module>
         <module>mystarter</module>
-        <module>shopping-mall-app</module>
+        <module>app</module>
     </modules>
 
     <distributionManagement>

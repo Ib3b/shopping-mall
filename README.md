@@ -25,9 +25,13 @@
 
 ```
 shopping-mall/
-├── pom.xml              # 父 POM
-├── shopping-mall-app/   # 主应用模块（网购商城 REST API）
-└── mystarter/           # 自定义 Starter 示例模块
+├── pom.xml       # 父 POM
+├── common/       # 公共模块（实体、DTO、异常、Repository）
+├── user/         # 用户模块（用户服务与控制器）
+├── product/      # 商品模块（商品服务与控制器）
+├── order/        # 订单模块（订单服务、控制器、邮件）
+├── mystarter/    # 自定义 Starter 示例
+└── app/          # 主应用入口
 ```
 
 ## ✨ 功能特性
@@ -48,7 +52,7 @@ shopping-mall/
 mvn clean package
 
 # 启动应用
-cd shopping-mall-app
+cd app
 mvn spring-boot:run
 
 # 运行测试
@@ -60,7 +64,7 @@ mvn test
 ```xml
 <dependency>
   <groupId>io.github.ib3b</groupId>
-  <artifactId>shopping-mall</artifactId>
+  <artifactId>app</artifactId>
   <version>1.0.0</version>
 </dependency>
 ```
