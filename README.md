@@ -34,46 +34,33 @@ shopping-mall/
 
 ### 模块依赖关系
 
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 280">
-  <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#6DB33F;stop-opacity:0.2"/>
-      <stop offset="100%" style="stop-color:#6DB33F;stop-opacity:0.1"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Nodes -->
-  <rect x="160" y="10" width="80" height="40" rx="6" fill="#E8F5E9" stroke="#6DB33F" stroke-width="2"/>
-  <text x="200" y="35" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#2E7D32">app</text>
-
-  <rect x="160" y="70" width="80" height="40" rx="6" fill="#E8F5E9" stroke="#6DB33F" stroke-width="2"/>
-  <text x="200" y="95" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#2E7D32">web</text>
-
-  <rect x="160" y="130" width="80" height="40" rx="6" fill="#E8F5E9" stroke="#6DB33F" stroke-width="2"/>
-  <text x="200" y="155" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#2E7D32">domain</text>
-
-  <rect x="160" y="190" width="80" height="40" rx="6" fill="#E8F5E9" stroke="#6DB33F" stroke-width="2"/>
-  <text x="200" y="215" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#2E7D32">facade</text>
-
-  <rect x="60" y="130" width="70" height="40" rx="6" fill="#FFF3E0" stroke="#FF9800" stroke-width="2"/>
-  <text x="95" y="155" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#E65100">starter</text>
-
-  <!-- Arrows -->
-  <line x1="200" y1="50" x2="200" y2="70" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
-  <line x1="200" y1="110" x2="200" y2="130" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
-  <line x1="200" y1="170" x2="200" y2="190" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
-  <line x1="130" y1="90" x2="160" y2="115" stroke="#FF9800" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arrowOrange)"/>
-  <line x1="130" y1="30" x2="160" y2="30" stroke="#FF9800" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arrowOrange)"/>
-
-  <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L9,3 z" fill="#666"/>
-    </marker>
-    <marker id="arrowOrange" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L9,3 z" fill="#FF9800"/>
-    </marker>
-  </defs>
-</svg>
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│                         ┌───────┐                               │
+│                         │  app  │  主应用入口                    │
+│                         └───┬───┘                               │
+│                             │                                   │
+│              ┌──────────────┼──────────────┐                    │
+│              │              │              │                    │
+│              ▼              │              ▼                    │
+│        ┌─────────┐          │        ┌─────────┐                │
+│        │   web   │◄─────────┴───────►│ starter │                │
+│        └────┬────┘    Controller     └─────────┘                │
+│             │                                       自定义       │
+│             │                                       Starter      │
+│             ▼                                                    │
+│       ┌─────────┐                                                │
+│       │ domain  │   业务领域层                                   │
+│       └────┬────┘                                                │
+│            │                                                     │
+│            ▼                                                     │
+│       ┌─────────┐                                                │
+│       │ facade  │   RPC 接口层（无依赖，二方包）                  │
+│       └─────────┘                                                │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ### 模块职责
 
