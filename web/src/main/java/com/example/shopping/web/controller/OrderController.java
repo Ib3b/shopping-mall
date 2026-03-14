@@ -1,8 +1,10 @@
-package com.example.shopping.order.controller;
+package com.example.shopping.web.controller;
 
-import com.example.shopping.common.dto.OrderRequest;
 import com.example.shopping.common.dto.OrderResponse;
-import com.example.shopping.common.entity.Order;
+import com.example.shopping.facade.OrderRpcService;
+import com.example.shopping.facade.dto.OrderCreateRequest;
+import com.example.shopping.facade.dto.OrderDTO;
+import com.example.shopping.facade.enums.OrderStatus;
 import com.example.shopping.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,9 +29,11 @@ import java.util.List;
 @Tag(name = "订单管理", description = "订单创建、查询、状态管理接口")
 public class OrderController {
 
+    private final OrderRpcService orderRpcService;
     private final OrderService orderService;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderRpcService orderRpcService, OrderService orderService) {
+        this.orderRpcService = orderRpcService;
         this.orderService = orderService;
     }
 
@@ -41,8 +45,8 @@ public class OrderController {
      */
     @PostMapping
     @Operation(summary = "创建订单", description = "创建新订单并扣减库存")
-    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody OrderRequest request) {
-        OrderResponse response = orderService.createOrder(request);
+    public ResponseEntity<OrderDTO> createOrder(@Valid @RequestBody OrderCreateRequest request) {
+        OrderDTO response = orderRpcService.createOrder(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -54,8 +58,8 @@ public class OrderController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "获取订单", description = "根据ID获取订单详情")
-    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
-        OrderResponse response = orderService.getOrderById(id);
+    public ResponseEntity<OrderDTO> getOrderById(@PathVariable Long id) {
+        OrderDTO response = orderRpcService.getOrderById(id);
         return ResponseEntity.ok(response);
     }
 
@@ -81,8 +85,8 @@ public class OrderController {
      */
     @GetMapping("/user/{userId}")
     @Operation(summary = "获取用户订单", description = "获取指定用户的订单列表")
-    public ResponseEntity<List<OrderResponse>> getOrdersByUserId(@PathVariable Long userId) {
-        List<OrderResponse> orders = orderService.getOrdersByUserId(userId);
+    public ResponseEntity<List<OrderDTO>> getOrdersByUserId(@PathVariable Long userId) {
+        List<OrderDTO> orders = orderRpcService.getOrdersByUserId(userId);
         return ResponseEntity.ok(orders);
     }
 
@@ -94,8 +98,8 @@ public class OrderController {
      */
     @GetMapping("/status/{status}")
     @Operation(summary = "根据状态查询", description = "获取指定状态的订单列表")
-    public ResponseEntity<List<OrderResponse>> getOrdersByStatus(@PathVariable Order.Status status) {
-        List<OrderResponse> orders = orderService.getOrdersByStatus(status);
+    public ResponseEntity<List<OrderDTO>> getOrdersByStatus(@PathVariable OrderStatus status) {
+        List<OrderDTO> orders = orderRpcService.getOrdersByStatus(status);
         return ResponseEntity.ok(orders);
     }
 
@@ -108,10 +112,10 @@ public class OrderController {
      */
     @PutMapping("/{id}/status")
     @Operation(summary = "更新订单状态", description = "更新订单状态")
-    public ResponseEntity<OrderResponse> updateOrderStatus(
+    public ResponseEntity<OrderDTO> updateOrderStatus(
             @PathVariable Long id,
-            @RequestParam Order.Status status) {
-        OrderResponse response = orderService.updateOrderStatus(id, status);
+            @RequestParam OrderStatus status) {
+        OrderDTO response = orderRpcService.updateOrderStatus(id, status);
         return ResponseEntity.ok(response);
     }
 
@@ -123,9 +127,9 @@ public class OrderController {
      */
     @PostMapping("/{id}/cancel")
     @Operation(summary = "取消订单", description = "取消订单并恢复库存")
-    public ResponseEntity<OrderResponse> cancelOrder(@PathVariable Long id) {
-        orderService.cancelOrder(id);
-        OrderResponse response = orderService.getOrderById(id);
+    public ResponseEntity<OrderDTO> cancelOrder(@PathVariable Long id) {
+        orderRpcService.cancelOrder(id);
+        OrderDTO response = orderRpcService.getOrderById(id);
         return ResponseEntity.ok(response);
     }
 
@@ -138,7 +142,7 @@ public class OrderController {
     @GetMapping("/user/{userId}/count")
     @Operation(summary = "用户订单数量", description = "获取用户订单数量")
     public ResponseEntity<Long> getUserOrderCount(@PathVariable Long userId) {
-        Long count = orderService.getUserOrderCount(userId);
+        Long count = orderRpcService.getUserOrderCount(userId);
         return ResponseEntity.ok(count);
     }
 }

@@ -11,15 +11,22 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>user</artifactId>
+    <artifactId>web</artifactId>
     <packaging>jar</packaging>
-    <name>user</name>
-    <description>用户模块 - 用户服务</description>
+    <name>web</name>
+    <description>HTTP接口层 - 聚合所有Controller</description>
 
     <dependencies>
+        <!-- 业务领域层（聚合facade实现和服务模块） -->
         <dependency>
             <groupId>io.github.ib3b</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.ib3b</groupId>
+            <artifactId>mystarter</artifactId>
             <version>${project.version}</version>
         </dependency>
 

@@ -1,18 +1,20 @@
 package com.example.shopping.controller;
 
-import com.example.shopping.common.dto.ProductRequest;
 import com.example.shopping.common.dto.ProductResponse;
-import com.example.shopping.product.controller.ProductController;
+import com.example.shopping.facade.ProductRpcService;
+import com.example.shopping.facade.dto.ProductCreateRequest;
+import com.example.shopping.facade.dto.ProductDTO;
 import com.example.shopping.product.service.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -27,11 +29,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * 商品控制器测试类
  */
-@WebMvcTest(value = ProductController.class,
-    excludeAutoConfiguration = {
-        org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration.class,
-        org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration.class
-    })
+@SpringBootTest
+@AutoConfigureMockMvc
 class ProductControllerTest {
 
     @Autowired
@@ -41,15 +40,18 @@ class ProductControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
+    private ProductRpcService productRpcService;
+
+    @MockitoBean
     private ProductService productService;
 
     @Test
     void shouldCreateProduct() throws Exception {
-        ProductRequest request = new ProductRequest("新商品", "描述", new BigDecimal("199.99"), 50, "分类");
-        ProductResponse response = new ProductResponse(1L, "新商品", "描述", new BigDecimal("199.99"), 50, "分类",
+        ProductCreateRequest request = new ProductCreateRequest("新商品", "描述", new BigDecimal("199.99"), 50, "分类");
+        ProductDTO response = new ProductDTO(1L, "新商品", "描述", new BigDecimal("199.99"), 50, "分类",
             LocalDateTime.now(), LocalDateTime.now());
 
-        when(productService.createProduct(any(ProductRequest.class))).thenReturn(response);
+        when(productRpcService.createProduct(any(ProductCreateRequest.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -61,10 +63,10 @@ class ProductControllerTest {
 
     @Test
     void shouldGetProductById() throws Exception {
-        ProductResponse response = new ProductResponse(1L, "测试商品", "描述", new BigDecimal("99.99"), 100, "电子产品",
+        ProductDTO response = new ProductDTO(1L, "测试商品", "描述", new BigDecimal("99.99"), 100, "电子产品",
             LocalDateTime.now(), LocalDateTime.now());
 
-        when(productService.getProductById(1L)).thenReturn(response);
+        when(productRpcService.getProductById(1L)).thenReturn(response);
 
         mockMvc.perform(get("/api/products/1"))
             .andExpect(status().isOk())
@@ -89,10 +91,10 @@ class ProductControllerTest {
 
     @Test
     void shouldGetProductsByCategory() throws Exception {
-        ProductResponse response = new ProductResponse(1L, "电子商品", "描述", new BigDecimal("100"), 50, "电子产品",
+        ProductDTO response = new ProductDTO(1L, "电子商品", "描述", new BigDecimal("100"), 50, "电子产品",
             LocalDateTime.now(), LocalDateTime.now());
 
-        when(productService.getProductsByCategory("电子产品")).thenReturn(List.of(response));
+        when(productRpcService.getProductsByCategory("电子产品")).thenReturn(List.of(response));
 
         mockMvc.perform(get("/api/products/category/电子产品"))
             .andExpect(status().isOk())
@@ -101,10 +103,10 @@ class ProductControllerTest {
 
     @Test
     void shouldSearchProducts() throws Exception {
-        ProductResponse response = new ProductResponse(1L, "iPhone15", "苹果手机", new BigDecimal("8999"), 50, "电子产品",
+        ProductDTO response = new ProductDTO(1L, "iPhone15", "苹果手机", new BigDecimal("8999"), 50, "电子产品",
             LocalDateTime.now(), LocalDateTime.now());
 
-        when(productService.searchProducts("iPhone")).thenReturn(List.of(response));
+        when(productRpcService.searchProducts("iPhone")).thenReturn(List.of(response));
 
         mockMvc.perform(get("/api/products/search").param("keyword", "iPhone"))
             .andExpect(status().isOk())

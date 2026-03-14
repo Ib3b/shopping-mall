@@ -55,6 +55,9 @@
         <module>product</module>
         <module>order</module>
         <module>mystarter</module>
+        <module>facade</module>
+        <module>domain</module>
+        <module>web</module>
         <module>app</module>
     </modules>
 

@@ -1,7 +1,10 @@
-package com.example.shopping.user.controller;
+package com.example.shopping.web.controller;
 
-import com.example.shopping.common.dto.UserRequest;
 import com.example.shopping.common.dto.UserResponse;
+import com.example.shopping.facade.UserRpcService;
+import com.example.shopping.facade.dto.UserCreateRequest;
+import com.example.shopping.facade.dto.UserDTO;
+import com.example.shopping.facade.dto.UserUpdateRequest;
 import com.example.shopping.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,9 +27,11 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "用户管理", description = "用户注册、登录、查询接口")
 public class UserController {
 
+    private final UserRpcService userRpcService;
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public UserController(UserRpcService userRpcService, UserService userService) {
+        this.userRpcService = userRpcService;
         this.userService = userService;
     }
 
@@ -38,8 +43,8 @@ public class UserController {
      */
     @PostMapping
     @Operation(summary = "用户注册", description = "创建新用户")
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
-        UserResponse response = userService.createUser(request);
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateRequest request) {
+        UserDTO response = userRpcService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -51,8 +56,8 @@ public class UserController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "获取用户", description = "根据ID获取用户信息")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
-        UserResponse response = userService.getUserById(id);
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+        UserDTO response = userRpcService.getUserById(id);
         return ResponseEntity.ok(response);
     }
 
@@ -78,8 +83,8 @@ public class UserController {
      */
     @GetMapping("/username/{username}")
     @Operation(summary = "根据用户名查询", description = "根据用户名获取用户信息")
-    public ResponseEntity<UserResponse> getUserByUsername(@PathVariable String username) {
-        UserResponse response = userService.getUserByUsername(username);
+    public ResponseEntity<UserDTO> getUserByUsername(@PathVariable String username) {
+        UserDTO response = userRpcService.getUserByUsername(username);
         return ResponseEntity.ok(response);
     }
 
@@ -92,10 +97,10 @@ public class UserController {
      */
     @PutMapping("/{id}")
     @Operation(summary = "更新用户", description = "更新用户信息")
-    public ResponseEntity<UserResponse> updateUser(
+    public ResponseEntity<UserDTO> updateUser(
             @PathVariable Long id,
-            @Valid @RequestBody UserRequest request) {
-        UserResponse response = userService.updateUser(id, request);
+            @Valid @RequestBody UserUpdateRequest request) {
+        UserDTO response = userRpcService.updateUser(id, request);
         return ResponseEntity.ok(response);
     }
 
@@ -108,7 +113,7 @@ public class UserController {
     @DeleteMapping("/{id}")
     @Operation(summary = "删除用户", description = "根据ID删除用户")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+        userRpcService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 }

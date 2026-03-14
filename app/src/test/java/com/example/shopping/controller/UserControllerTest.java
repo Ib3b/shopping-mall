@@ -1,20 +1,20 @@
 package com.example.shopping.controller;
 
-import com.example.shopping.common.dto.UserRequest;
 import com.example.shopping.common.dto.UserResponse;
-import com.example.shopping.user.controller.UserController;
+import com.example.shopping.facade.UserRpcService;
+import com.example.shopping.facade.dto.UserCreateRequest;
+import com.example.shopping.facade.dto.UserDTO;
 import com.example.shopping.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -28,11 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * 用户控制器测试类
  */
-@WebMvcTest(value = UserController.class,
-    excludeAutoConfiguration = {
-        org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration.class,
-        org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration.class
-    })
+@SpringBootTest
+@AutoConfigureMockMvc
 class UserControllerTest {
 
     @Autowired
@@ -42,14 +39,17 @@ class UserControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
+    private UserRpcService userRpcService;
+
+    @MockitoBean
     private UserService userService;
 
     @Test
     void shouldCreateUser() throws Exception {
-        UserRequest request = new UserRequest("newuser", "new@example.com", "password");
-        UserResponse response = new UserResponse(1L, "newuser", "new@example.com", LocalDateTime.now());
+        UserCreateRequest request = new UserCreateRequest("newuser", "new@example.com", "password");
+        UserDTO response = new UserDTO(1L, "newuser", "new@example.com", LocalDateTime.now());
 
-        when(userService.createUser(any(UserRequest.class))).thenReturn(response);
+        when(userRpcService.createUser(any(UserCreateRequest.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -61,9 +61,9 @@ class UserControllerTest {
 
     @Test
     void shouldGetUserById() throws Exception {
-        UserResponse response = new UserResponse(1L, "testuser", "test@example.com", LocalDateTime.now());
+        UserDTO response = new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now());
 
-        when(userService.getUserById(1L)).thenReturn(response);
+        when(userRpcService.getUserById(1L)).thenReturn(response);
 
         mockMvc.perform(get("/api/users/1"))
             .andExpect(status().isOk())
@@ -86,7 +86,7 @@ class UserControllerTest {
 
     @Test
     void shouldReturn404WhenUserNotFound() throws Exception {
-        when(userService.getUserById(999L)).thenThrow(new com.example.shopping.common.exception.BusinessException("用户不存在"));
+        when(userRpcService.getUserById(999L)).thenThrow(new com.example.shopping.common.exception.BusinessException("用户不存在"));
 
         mockMvc.perform(get("/api/users/999"))
             .andExpect(status().isBadRequest());

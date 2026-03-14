@@ -1,7 +1,10 @@
-package com.example.shopping.product.controller;
+package com.example.shopping.web.controller;
 
-import com.example.shopping.common.dto.ProductRequest;
 import com.example.shopping.common.dto.ProductResponse;
+import com.example.shopping.facade.ProductRpcService;
+import com.example.shopping.facade.dto.ProductCreateRequest;
+import com.example.shopping.facade.dto.ProductDTO;
+import com.example.shopping.facade.dto.ProductUpdateRequest;
 import com.example.shopping.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,9 +29,11 @@ import java.util.List;
 @Tag(name = "商品管理", description = "商品CRUD、库存管理接口")
 public class ProductController {
 
+    private final ProductRpcService productRpcService;
     private final ProductService productService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductRpcService productRpcService, ProductService productService) {
+        this.productRpcService = productRpcService;
         this.productService = productService;
     }
 
@@ -40,8 +45,8 @@ public class ProductController {
      */
     @PostMapping
     @Operation(summary = "创建商品", description = "添加新商品")
-    public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest request) {
-        ProductResponse response = productService.createProduct(request);
+    public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductCreateRequest request) {
+        ProductDTO response = productRpcService.createProduct(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -53,8 +58,8 @@ public class ProductController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "获取商品", description = "根据ID获取商品详情")
-    public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
-        ProductResponse response = productService.getProductById(id);
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
+        ProductDTO response = productRpcService.getProductById(id);
         return ResponseEntity.ok(response);
     }
 
@@ -80,9 +85,9 @@ public class ProductController {
      */
     @GetMapping("/category/{category}")
     @Operation(summary = "根据分类查询", description = "获取指定分类的商品列表")
-    public ResponseEntity<List<ProductResponse>> getProductsByCategory(
+    public ResponseEntity<List<ProductDTO>> getProductsByCategory(
             @PathVariable String category) {
-        List<ProductResponse> products = productService.getProductsByCategory(category);
+        List<ProductDTO> products = productRpcService.getProductsByCategory(category);
         return ResponseEntity.ok(products);
     }
 
@@ -94,9 +99,9 @@ public class ProductController {
      */
     @GetMapping("/search")
     @Operation(summary = "搜索商品", description = "根据关键词搜索商品")
-    public ResponseEntity<List<ProductResponse>> searchProducts(
+    public ResponseEntity<List<ProductDTO>> searchProducts(
             @RequestParam String keyword) {
-        List<ProductResponse> products = productService.searchProducts(keyword);
+        List<ProductDTO> products = productRpcService.searchProducts(keyword);
         return ResponseEntity.ok(products);
     }
 
@@ -107,8 +112,8 @@ public class ProductController {
      */
     @GetMapping("/in-stock")
     @Operation(summary = "获取有库存商品", description = "获取所有有库存的商品")
-    public ResponseEntity<List<ProductResponse>> getInStockProducts() {
-        List<ProductResponse> products = productService.getInStockProducts();
+    public ResponseEntity<List<ProductDTO>> getInStockProducts() {
+        List<ProductDTO> products = productRpcService.getInStockProducts();
         return ResponseEntity.ok(products);
     }
 
@@ -121,10 +126,10 @@ public class ProductController {
      */
     @PutMapping("/{id}")
     @Operation(summary = "更新商品", description = "更新商品信息")
-    public ResponseEntity<ProductResponse> updateProduct(
+    public ResponseEntity<ProductDTO> updateProduct(
             @PathVariable Long id,
-            @Valid @RequestBody ProductRequest request) {
-        ProductResponse response = productService.updateProduct(id, request);
+            @Valid @RequestBody ProductUpdateRequest request) {
+        ProductDTO response = productRpcService.updateProduct(id, request);
         return ResponseEntity.ok(response);
     }
 
@@ -137,7 +142,7 @@ public class ProductController {
     @DeleteMapping("/{id}")
     @Operation(summary = "删除商品", description = "根据ID删除商品")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        productService.deleteProduct(id);
+        productRpcService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 }

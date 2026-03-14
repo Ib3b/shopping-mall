@@ -17,28 +17,10 @@
     <description>Spring Boot主应用入口</description>
 
     <dependencies>
-        <!-- 业务模块 -->
+        <!-- Web层 - 包含所有Controller和domain层依赖 -->
         <dependency>
             <groupId>io.github.ib3b</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.github.ib3b</groupId>
-            <artifactId>user</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.github.ib3b</groupId>
-            <artifactId>product</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.github.ib3b</groupId>
-            <artifactId>order</artifactId>
+            <artifactId>web</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -92,6 +74,10 @@
             <artifactId>scala-library</artifactId>
             <version>${scala.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
     </dependencies>
 

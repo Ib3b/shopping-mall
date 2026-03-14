@@ -1,19 +1,21 @@
 package com.example.shopping.controller;
 
-import com.example.shopping.common.dto.OrderRequest;
 import com.example.shopping.common.dto.OrderResponse;
-import com.example.shopping.common.entity.Order;
-import com.example.shopping.order.controller.OrderController;
+import com.example.shopping.facade.OrderRpcService;
+import com.example.shopping.facade.dto.OrderCreateRequest;
+import com.example.shopping.facade.dto.OrderDTO;
+import com.example.shopping.facade.enums.OrderStatus;
 import com.example.shopping.order.service.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -29,11 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * 订单控制器测试类
  */
-@WebMvcTest(value = OrderController.class,
-    excludeAutoConfiguration = {
-        org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration.class,
-        org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration.class
-    })
+@SpringBootTest
+@AutoConfigureMockMvc
 class OrderControllerTest {
 
     @Autowired
@@ -43,15 +42,18 @@ class OrderControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
+    private OrderRpcService orderRpcService;
+
+    @MockitoBean
     private OrderService orderService;
 
     @Test
     void shouldCreateOrder() throws Exception {
-        OrderRequest request = new OrderRequest(1L, 1L, 2);
-        OrderResponse response = new OrderResponse(1L, 1L, "testuser", 1L, "Test Product", 2,
+        OrderCreateRequest request = new OrderCreateRequest(1L, 1L, 2);
+        OrderDTO response = new OrderDTO(1L, 1L, "testuser", 1L, "Test Product", 2,
             new BigDecimal("200"), "PENDING", "Pending", LocalDateTime.now(), LocalDateTime.now());
 
-        when(orderService.createOrder(any(OrderRequest.class))).thenReturn(response);
+        when(orderRpcService.createOrder(any(OrderCreateRequest.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/orders")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -63,10 +65,10 @@ class OrderControllerTest {
 
     @Test
     void shouldGetOrderById() throws Exception {
-        OrderResponse response = new OrderResponse(1L, 1L, "testuser", 1L, "Test Product", 2,
+        OrderDTO response = new OrderDTO(1L, 1L, "testuser", 1L, "Test Product", 2,
             new BigDecimal("200"), "PENDING", "Pending", LocalDateTime.now(), LocalDateTime.now());
 
-        when(orderService.getOrderById(1L)).thenReturn(response);
+        when(orderRpcService.getOrderById(1L)).thenReturn(response);
 
         mockMvc.perform(get("/api/orders/1"))
             .andExpect(status().isOk())
@@ -76,10 +78,10 @@ class OrderControllerTest {
 
     @Test
     void shouldGetOrdersByUserId() throws Exception {
-        OrderResponse response = new OrderResponse(1L, 1L, "testuser", 1L, "Test Product", 2,
+        OrderDTO response = new OrderDTO(1L, 1L, "testuser", 1L, "Test Product", 2,
             new BigDecimal("200"), "PENDING", "Pending", LocalDateTime.now(), LocalDateTime.now());
 
-        when(orderService.getOrdersByUserId(1L)).thenReturn(List.of(response));
+        when(orderRpcService.getOrdersByUserId(1L)).thenReturn(List.of(response));
 
         mockMvc.perform(get("/api/orders/user/1"))
             .andExpect(status().isOk())
@@ -103,10 +105,10 @@ class OrderControllerTest {
 
     @Test
     void shouldUpdateOrderStatus() throws Exception {
-        OrderResponse response = new OrderResponse(1L, 1L, "testuser", 1L, "Test Product", 2,
+        OrderDTO response = new OrderDTO(1L, 1L, "testuser", 1L, "Test Product", 2,
             new BigDecimal("200"), "PAID", "Paid", LocalDateTime.now(), LocalDateTime.now());
 
-        when(orderService.updateOrderStatus(1L, Order.Status.PAID)).thenReturn(response);
+        when(orderRpcService.updateOrderStatus(1L, OrderStatus.PAID)).thenReturn(response);
 
         mockMvc.perform(put("/api/orders/1/status")
                 .param("status", "PAID"))
@@ -116,11 +118,11 @@ class OrderControllerTest {
 
     @Test
     void shouldCancelOrder() throws Exception {
-        OrderResponse response = new OrderResponse(1L, 1L, "testuser", 1L, "Test Product", 2,
+        OrderDTO response = new OrderDTO(1L, 1L, "testuser", 1L, "Test Product", 2,
             new BigDecimal("200"), "CANCELLED", "Cancelled", LocalDateTime.now(), LocalDateTime.now());
 
-        doNothing().when(orderService).cancelOrder(1L);
-        when(orderService.getOrderById(1L)).thenReturn(response);
+        doNothing().when(orderRpcService).cancelOrder(1L);
+        when(orderRpcService.getOrderById(1L)).thenReturn(response);
 
         mockMvc.perform(post("/api/orders/1/cancel"))
             .andExpect(status().isOk())
@@ -129,7 +131,7 @@ class OrderControllerTest {
 
     @Test
     void shouldGetUserOrderCount() throws Exception {
-        when(orderService.getUserOrderCount(1L)).thenReturn(5L);
+        when(orderRpcService.getUserOrderCount(1L)).thenReturn(5L);
 
         mockMvc.perform(get("/api/orders/user/1/count"))
             .andExpect(status().isOk())
