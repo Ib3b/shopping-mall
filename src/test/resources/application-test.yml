@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  
+  cache:
+    cache-names: userCache,productCache
+    caffeine:
+      spec: maximumSize=100,expireAfterWrite=60s
+  
+  sql:
+    init:
+      mode: never
+  
+  mail:
+    host: localhost
+    port: 25
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

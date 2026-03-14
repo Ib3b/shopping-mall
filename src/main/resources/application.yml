@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: shopping-mall
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:sqlite:shopping.db
+    driver-class-name: org.sqlite.JDBC
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      maximum-pool-size: 50
+      minimum-idle: 5
+      connection-timeout: 60000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: ShoppingHikariPool
+  
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+  
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+  
+  cache:
+    cache-names: userCache,productCache
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=300s
+  
+  mail:
+    host: localhost
+    port: 25
+    username: noreply@shopping-mall.com
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+logging:
+  level:
+    com.example.shopping: DEBUG
+    org.hibernate.SQL: DEBUG
+    API_CALL: INFO
+
+# 自定义 Starter 配置
+myapp:
+  greeting:
+    prefix: "欢迎光临"
+    enabled: true

@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:shopping-dev.db
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  sql:
+    init:
+      mode: always
+
+  cache:
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=300s
+
+logging:
+  level:
+    com.example.shopping: DEBUG
+    org.hibernate.SQL: DEBUG
