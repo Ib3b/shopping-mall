@@ -48,6 +48,8 @@ Thumbs.db
 
 # Gatling reports (generated)
 target/gatling/
+performance-test-report.md
+results.jtl
 
 # Application specific
 shopping.db
