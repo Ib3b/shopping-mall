@@ -8,7 +8,6 @@ import com.example.shopping.facade.enums.OrderStatus;
 import com.example.shopping.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -45,7 +44,7 @@ public class OrderController {
      */
     @PostMapping
     @Operation(summary = "创建订单", description = "创建新订单并扣减库存")
-    public ResponseEntity<OrderDTO> createOrder(@Valid @RequestBody OrderCreateRequest request) {
+    public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderCreateRequest request) {
         OrderDTO response = orderRpcService.createOrder(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

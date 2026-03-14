@@ -8,7 +8,6 @@ import com.example.shopping.facade.dto.ProductUpdateRequest;
 import com.example.shopping.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -45,7 +44,7 @@ public class ProductController {
      */
     @PostMapping
     @Operation(summary = "创建商品", description = "添加新商品")
-    public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductCreateRequest request) {
+    public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductCreateRequest request) {
         ProductDTO response = productRpcService.createProduct(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -128,7 +127,7 @@ public class ProductController {
     @Operation(summary = "更新商品", description = "更新商品信息")
     public ResponseEntity<ProductDTO> updateProduct(
             @PathVariable Long id,
-            @Valid @RequestBody ProductUpdateRequest request) {
+            @RequestBody ProductUpdateRequest request) {
         ProductDTO response = productRpcService.updateProduct(id, request);
         return ResponseEntity.ok(response);
     }

@@ -8,7 +8,6 @@ import com.example.shopping.facade.dto.UserUpdateRequest;
 import com.example.shopping.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -43,7 +42,7 @@ public class UserController {
      */
     @PostMapping
     @Operation(summary = "用户注册", description = "创建新用户")
-    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateRequest request) {
+    public ResponseEntity<UserDTO> createUser(@RequestBody UserCreateRequest request) {
         UserDTO response = userRpcService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -99,7 +98,7 @@ public class UserController {
     @Operation(summary = "更新用户", description = "更新用户信息")
     public ResponseEntity<UserDTO> updateUser(
             @PathVariable Long id,
-            @Valid @RequestBody UserUpdateRequest request) {
+            @RequestBody UserUpdateRequest request) {
         UserDTO response = userRpcService.updateUser(id, request);
         return ResponseEntity.ok(response);
     }

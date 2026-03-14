@@ -17,10 +17,6 @@
     <description>RPC服务接口层 - 二方包，仅接口定义和DTO，无任何依赖</description>
 
     <dependencies>
-        <!-- 无任何业务依赖，仅依赖基础库 -->
-        <dependency>
-            <groupId>jakarta.validation</groupId>
-            <artifactId>jakarta.validation-api</artifactId>
-        </dependency>
+        <!-- 无任何依赖，纯接口定义 -->
     </dependencies>
 </project>
