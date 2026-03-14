@@ -5,11 +5,17 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/Ib3b/shopping-mall/actions/workflows/ci.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/Ib3b/shopping-mall/ci.yml?style=flat-square&logo=github&label=CI" alt="CI">
+  </a>
+  <a href="https://github.com/Ib3b/shopping-mall/packages">
+    <img src="https://img.shields.io/badge/GitHub-Packages-8A2BE2?style=flat-square&logo=github" alt="GitHub Packages">
+  </a>
+  <a href="https://github.com/Ib3b/shopping-mall/releases">
+    <img src="https://img.shields.io/github/v/release/Ib3b/shopping-mall?style=flat-square&logo=github" alt="Release">
+  </a>
   <img src="https://img.shields.io/badge/Spring%20Boot-3.2.5-6DB33F?style=flat-square&logo=springboot" alt="Spring Boot">
   <img src="https://img.shields.io/badge/JDK-21-007396?style=flat-square&logo=openjdk" alt="JDK">
-  <img src="https://img.shields.io/badge/Maven-3.9.12-C71A36?style=flat-square&logo=apachemaven" alt="Maven">
-  <img src="https://img.shields.io/badge/SQLite-3.45-003B57?style=flat-square&logo=sqlite" alt="SQLite">
-  <img src="https://img.shields.io/badge/Gatling-3.13.5-F68D3F?style=flat-square" alt="Gatling">
   <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License">
 </p>
 
@@ -33,9 +39,16 @@ mvn spring-boot:run
 
 # 运行测试
 mvn test
+```
 
-# 性能测试
-mvn gatling:test
+## 📦 使用 GitHub Packages
+
+```xml
+<dependency>
+  <groupId>io.github.ib3b</groupId>
+  <artifactId>shopping-mall</artifactId>
+  <version>1.0.0</version>
+</dependency>
 ```
 
 ## 🔗 访问地址
@@ -83,24 +96,10 @@ POST   /api/orders/{id}/cancel        # 取消订单
 ```
 </details>
 
-## 🏗️ 项目结构
-
-```
-src/main/java/com/example/shopping/
-├── config/          # 配置类
-├── controller/      # REST 控制器
-├── service/         # 业务逻辑
-├── repository/      # 数据访问
-├── entity/          # 实体类
-├── dto/             # 数据传输对象
-└── exception/       # 异常处理
-```
-
 ## 📋 运行要求
 
 - JDK 21+
 - Maven 3.6+
-- 端口 8080 未占用
 
 ---
 
