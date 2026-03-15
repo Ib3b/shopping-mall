@@ -6,9 +6,13 @@ import com.example.shopping.common.entity.Order;
 import com.example.shopping.common.entity.Product;
 import com.example.shopping.common.entity.User;
 import com.example.shopping.common.exception.BusinessException;
+import com.example.shopping.order.event.OrderCreatedEvent;
+import com.example.shopping.order.event.OrderStatusChangedEvent;
+import com.example.shopping.order.state.OrderStateHandlerRegistry;
 import com.example.shopping.product.service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,6 +24,7 @@ import java.util.List;
  * 订单服务类
  * <p>
  * 提供订单的创建、查询、状态管理等业务逻辑。
+ * 使用状态模式管理状态转换，使用观察者模式（事件驱动）处理通知。
  * </p>
  */
 @Service
@@ -29,20 +34,23 @@ public class OrderService {
 
     private final OrderDataAccessor orderDataAccessor;
     private final ProductService productService;
-    private final MailService mailService;
+    private final OrderStateHandlerRegistry stateHandlerRegistry;
+    private final ApplicationEventPublisher eventPublisher;
 
     public OrderService(OrderDataAccessor orderDataAccessor,
                         ProductService productService,
-                        MailService mailService) {
+                        OrderStateHandlerRegistry stateHandlerRegistry,
+                        ApplicationEventPublisher eventPublisher) {
         this.orderDataAccessor = orderDataAccessor;
         this.productService = productService;
-        this.mailService = mailService;
+        this.stateHandlerRegistry = stateHandlerRegistry;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
      * 创建订单
      * <p>
-     * 创建订单时会自动扣减库存并发送确认邮件。
+     * 创建订单时会自动扣减库存并发布订单创建事件。
      * </p>
      *
      * @param request 订单请求
@@ -66,7 +74,8 @@ public class OrderService {
 
         productService.updateStock(request.productId(), request.quantity());
 
-        mailService.sendOrderConfirmation(saved);
+        // 发布订单创建事件（观察者模式）
+        eventPublisher.publishEvent(new OrderCreatedEvent(saved));
 
         logger.info("订单创建成功 - 订单ID: {}", saved.getId());
 
@@ -134,13 +143,8 @@ public class OrderService {
     /**
      * 更新订单状态
      * <p>
-     * 状态转换规则：
-     * <ul>
-     *   <li>PENDING -> PAID</li>
-     *   <li>PAID -> SHIPPED</li>
-     *   <li>SHIPPED -> DELIVERED</li>
-     *   <li>PENDING/PAID -> CANCELLED（恢复库存）</li>
-     * </ul>
+     * 使用状态模式验证状态转换的合法性，
+     * 转换成功后发布状态变更事件。
      * </p>
      *
      * @param orderId   订单ID
@@ -151,34 +155,25 @@ public class OrderService {
     @Transactional
     public OrderResponse updateOrderStatus(Long orderId, Order.Status newStatus) {
         Order order = orderDataAccessor.getOrder(orderId);
-
         Order.Status currentStatus = order.getStatus();
 
-        boolean validTransition = switch (newStatus) {
-            case PAID -> currentStatus == Order.Status.PENDING;
-            case SHIPPED -> currentStatus == Order.Status.PAID;
-            case DELIVERED -> currentStatus == Order.Status.SHIPPED;
-            case CANCELLED -> currentStatus == Order.Status.PENDING ||
-                             currentStatus == Order.Status.PAID;
-            default -> false;
-        };
-
-        if (!validTransition) {
+        // 使用状态模式验证状态转换
+        if (!stateHandlerRegistry.canTransition(currentStatus, newStatus)) {
             throw new BusinessException("订单状态不允许从 " +
                 currentStatus.getDescription() + " 变更为 " +
                 newStatus.getDescription());
         }
 
+        // 取消订单时恢复库存
         if (newStatus == Order.Status.CANCELLED) {
-            productService.updateStock(order.getProduct().getId(),
-                -order.getQuantity());
+            productService.updateStock(order.getProduct().getId(), -order.getQuantity());
         }
 
         order.setStatus(newStatus);
-
         Order saved = orderDataAccessor.saveOrder(order);
 
-        mailService.sendOrderStatusUpdate(saved);
+        // 发布状态变更事件（观察者模式）
+        eventPublisher.publishEvent(new OrderStatusChangedEvent(saved, currentStatus, newStatus));
 
         logger.info("订单状态更新 - 订单ID: {}, 新状态: {}", orderId, newStatus);
 

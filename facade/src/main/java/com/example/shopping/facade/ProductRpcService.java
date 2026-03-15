@@ -1,5 +1,6 @@
 package com.example.shopping.facade;
 
+import com.example.shopping.facade.dto.PageDTO;
 import com.example.shopping.facade.dto.ProductCreateRequest;
 import com.example.shopping.facade.dto.ProductDTO;
 import com.example.shopping.facade.dto.ProductUpdateRequest;
@@ -37,6 +38,15 @@ public interface ProductRpcService {
      * @return 商品列表
      */
     List<ProductDTO> getAllProducts();
+
+    /**
+     * 分页获取所有商品
+     *
+     * @param pageNumber 页码（从0开始）
+     * @param pageSize   每页大小
+     * @return 分页商品列表
+     */
+    PageDTO<ProductDTO> getAllProducts(int pageNumber, int pageSize);
 
     /**
      * 根据分类获取商品

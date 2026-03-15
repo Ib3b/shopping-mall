@@ -1,16 +1,13 @@
 package com.example.shopping.web.controller;
 
-import com.example.shopping.common.dto.ProductResponse;
 import com.example.shopping.facade.ProductRpcService;
+import com.example.shopping.facade.dto.PageDTO;
 import com.example.shopping.facade.dto.ProductCreateRequest;
 import com.example.shopping.facade.dto.ProductDTO;
 import com.example.shopping.facade.dto.ProductUpdateRequest;
-import com.example.shopping.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,11 +26,9 @@ import java.util.List;
 public class ProductController {
 
     private final ProductRpcService productRpcService;
-    private final ProductService productService;
 
-    public ProductController(ProductRpcService productRpcService, ProductService productService) {
+    public ProductController(ProductRpcService productRpcService) {
         this.productRpcService = productRpcService;
-        this.productService = productService;
     }
 
     /**
@@ -44,7 +39,7 @@ public class ProductController {
      */
     @PostMapping
     @Operation(summary = "创建商品", description = "添加新商品")
-    public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductCreateRequest request) {
+    public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductCreateRequest request) {
         ProductDTO response = productRpcService.createProduct(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -65,14 +60,16 @@ public class ProductController {
     /**
      * 分页获取所有商品
      *
-     * @param pageable 分页参数（默认每页10条）
+     * @param page 页码（从0开始，默认0）
+     * @param size 每页大小（默认10）
      * @return 商品分页列表
      */
     @GetMapping
     @Operation(summary = "获取所有商品", description = "分页获取商品列表")
-    public ResponseEntity<Page<ProductResponse>> getAllProducts(
-            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
-        Page<ProductResponse> products = productService.getAllProducts(pageable);
+    public ResponseEntity<PageDTO<ProductDTO>> getAllProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        PageDTO<ProductDTO> products = productRpcService.getAllProducts(page, size);
         return ResponseEntity.ok(products);
     }
 
@@ -127,7 +124,7 @@ public class ProductController {
     @Operation(summary = "更新商品", description = "更新商品信息")
     public ResponseEntity<ProductDTO> updateProduct(
             @PathVariable Long id,
-            @RequestBody ProductUpdateRequest request) {
+            @Valid @RequestBody ProductUpdateRequest request) {
         ProductDTO response = productRpcService.updateProduct(id, request);
         return ResponseEntity.ok(response);
     }

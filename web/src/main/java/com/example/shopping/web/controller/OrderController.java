@@ -1,16 +1,13 @@
 package com.example.shopping.web.controller;
 
-import com.example.shopping.common.dto.OrderResponse;
 import com.example.shopping.facade.OrderRpcService;
 import com.example.shopping.facade.dto.OrderCreateRequest;
 import com.example.shopping.facade.dto.OrderDTO;
+import com.example.shopping.facade.dto.PageDTO;
 import com.example.shopping.facade.enums.OrderStatus;
-import com.example.shopping.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,11 +26,9 @@ import java.util.List;
 public class OrderController {
 
     private final OrderRpcService orderRpcService;
-    private final OrderService orderService;
 
-    public OrderController(OrderRpcService orderRpcService, OrderService orderService) {
+    public OrderController(OrderRpcService orderRpcService) {
         this.orderRpcService = orderRpcService;
-        this.orderService = orderService;
     }
 
     /**
@@ -44,7 +39,7 @@ public class OrderController {
      */
     @PostMapping
     @Operation(summary = "创建订单", description = "创建新订单并扣减库存")
-    public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderCreateRequest request) {
+    public ResponseEntity<OrderDTO> createOrder(@Valid @RequestBody OrderCreateRequest request) {
         OrderDTO response = orderRpcService.createOrder(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -65,14 +60,16 @@ public class OrderController {
     /**
      * 分页获取所有订单
      *
-     * @param pageable 分页参数（默认每页10条）
+     * @param page 页码（从0开始，默认0）
+     * @param size 每页大小（默认10）
      * @return 订单分页列表
      */
     @GetMapping
     @Operation(summary = "获取所有订单", description = "分页获取订单列表")
-    public ResponseEntity<Page<OrderResponse>> getAllOrders(
-            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
-        Page<OrderResponse> orders = orderService.getAllOrders(pageable);
+    public ResponseEntity<PageDTO<OrderDTO>> getAllOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        PageDTO<OrderDTO> orders = orderRpcService.getAllOrders(page, size);
         return ResponseEntity.ok(orders);
     }
 

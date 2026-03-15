@@ -2,6 +2,7 @@ package com.example.shopping.facade;
 
 import com.example.shopping.facade.dto.OrderCreateRequest;
 import com.example.shopping.facade.dto.OrderDTO;
+import com.example.shopping.facade.dto.PageDTO;
 import com.example.shopping.facade.enums.OrderStatus;
 
 import java.util.List;
@@ -37,6 +38,15 @@ public interface OrderRpcService {
      * @return 订单列表
      */
     List<OrderDTO> getAllOrders();
+
+    /**
+     * 分页获取所有订单
+     *
+     * @param pageNumber 页码（从0开始）
+     * @param pageSize 每页大小
+     * @return 分页订单列表
+     */
+    PageDTO<OrderDTO> getAllOrders(int pageNumber, int pageSize);
 
     /**
      * 根据用户ID获取订单

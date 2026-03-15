@@ -3,6 +3,7 @@ package com.example.shopping.facade;
 import com.example.shopping.facade.dto.UserCreateRequest;
 import com.example.shopping.facade.dto.UserDTO;
 import com.example.shopping.facade.dto.UserUpdateRequest;
+import com.example.shopping.facade.dto.PageDTO;
 
 import java.util.List;
 
@@ -45,6 +46,15 @@ public interface UserRpcService {
      * @return 用户列表
      */
     List<UserDTO> getAllUsers();
+
+    /**
+     * 分页获取所有用户
+     *
+     * @param pageNumber 页码（从0开始）
+     * @param pageSize 每页大小
+     * @return 分页用户列表
+     */
+    PageDTO<UserDTO> getAllUsers(int pageNumber, int pageSize);
 
     /**
      * 更新用户

@@ -15,7 +15,7 @@ spring:
       idle-timeout: 600000
       max-lifetime: 1800000
       pool-name: ShoppingHikariPool
-  
+
   jpa:
     database-platform: org.hibernate.community.dialect.SQLiteDialect
     hibernate:
@@ -25,20 +25,40 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
-  
+
   sql:
     init:
       mode: always
       schema-locations: classpath:schema.sql
       data-locations: classpath:data.sql
-  
+
   cache:
     cache-names: userCache,productCache
     caffeine:
       spec: maximumSize=1000,expireAfterWrite=300s
-  
-  server:
+
+  # 静态资源配置
+  web:
+    resources:
+      add-mappings: true
+      static-locations: classpath:/static/
+  mvc:
+    throw-exception-if-no-handler-found: false
+    static-path-pattern: /**
+
+server:
   port: 8080
+
+# Actuator 配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,beans,conditions,env,metrics,mappings
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
 
 springdoc:
   api-docs:
@@ -52,7 +72,6 @@ logging:
   level:
     com.example.shopping: DEBUG
     org.hibernate.SQL: DEBUG
-    API_CALL: INFO
 
 # 自定义 Starter 配置
 myapp:

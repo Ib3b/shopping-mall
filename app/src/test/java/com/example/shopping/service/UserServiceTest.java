@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -29,6 +30,9 @@ class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private UserService userService;
 
@@ -36,7 +40,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        testUser = new User("testuser", "test@example.com", "password123");
+        testUser = new User("testuser", "test@example.com", "encodedPassword");
         testUser.setId(1L);
         testUser.setCreatedAt(LocalDateTime.now());
     }
@@ -47,6 +51,7 @@ class UserServiceTest {
 
         when(userRepository.existsByUsername("newuser")).thenReturn(false);
         when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User user = invocation.getArgument(0);
             user.setId(1L);
@@ -59,6 +64,7 @@ class UserServiceTest {
         assertEquals("newuser", response.username());
         assertEquals("new@example.com", response.email());
         verify(userRepository).save(any(User.class));
+        verify(passwordEncoder).encode("password");
     }
 
     @Test
@@ -124,6 +130,7 @@ class UserServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userRepository.existsByUsername("updateduser")).thenReturn(false);
+        when(passwordEncoder.encode("newpassword")).thenReturn("newEncodedPassword");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         UserResponse response = userService.updateUser(1L, request);
@@ -131,6 +138,7 @@ class UserServiceTest {
         assertNotNull(response);
         assertEquals("updateduser", response.username());
         assertEquals("updated@example.com", response.email());
+        verify(passwordEncoder).encode("newpassword");
     }
 
     @Test

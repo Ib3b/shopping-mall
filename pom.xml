@@ -47,6 +47,7 @@
         <gatling.version>3.13.5</gatling.version>
         <gatling-maven-plugin.version>4.21.0</gatling-maven-plugin.version>
         <scala.version>2.13.16</scala.version>
+        <mockito-inline.version>5.2.0</mockito-inline.version>
     </properties>
 
     <modules>
@@ -56,6 +57,17 @@
         <module>web</module>
         <module>app</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Mockito for JDK 21+ -->
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-inline</artifactId>
+                <version>${mockito-inline.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <distributionManagement>
         <repository>

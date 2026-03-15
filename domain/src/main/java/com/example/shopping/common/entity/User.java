@@ -8,6 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * 用户实体类
@@ -37,7 +38,7 @@ public class User {
 
     @NotBlank(message = "密码不能为空")
     @Size(min = 6, max = 100, message = "密码长度必须在6-100之间")
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 255)
     private String password;
 
     @CreatedDate
@@ -143,5 +144,17 @@ public class User {
 
     public void setVersion(Long version) {
         this.version = version;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User user)) return false;
+        return id != null && id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

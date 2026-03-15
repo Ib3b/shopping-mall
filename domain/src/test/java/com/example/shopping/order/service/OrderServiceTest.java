@@ -6,17 +6,20 @@ import com.example.shopping.common.entity.Order;
 import com.example.shopping.common.entity.Product;
 import com.example.shopping.common.entity.User;
 import com.example.shopping.common.exception.BusinessException;
+import com.example.shopping.order.event.OrderCreatedEvent;
+import com.example.shopping.order.event.OrderStatusChangedEvent;
+import com.example.shopping.order.state.OrderStateHandlerRegistry;
 import com.example.shopping.product.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,7 +38,10 @@ class OrderServiceTest {
     private ProductService productService;
 
     @Mock
-    private MailService mailService;
+    private OrderStateHandlerRegistry stateHandlerRegistry;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     private OrderService orderService;
 
@@ -45,7 +51,7 @@ class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        orderService = new OrderService(orderDataAccessor, productService, mailService);
+        orderService = new OrderService(orderDataAccessor, productService, stateHandlerRegistry, eventPublisher);
 
         testUser = new User("testuser", "test@example.com", "password123");
         testUser.setId(1L);
@@ -70,7 +76,6 @@ class OrderServiceTest {
             order.setId(1L);
             return order;
         });
-        doNothing().when(mailService).sendOrderConfirmation(any(Order.class));
 
         OrderResponse response = orderService.createOrder(request);
 
@@ -78,7 +83,7 @@ class OrderServiceTest {
         assertEquals(1L, response.id());
         assertEquals(2, response.quantity());
         verify(productService).updateStock(1L, 2);
-        verify(mailService).sendOrderConfirmation(any(Order.class));
+        verify(eventPublisher).publishEvent(any(OrderCreatedEvent.class));
     }
 
     @Test
@@ -160,16 +165,19 @@ class OrderServiceTest {
     void shouldUpdateOrderStatus() {
         when(orderDataAccessor.getOrder(1L)).thenReturn(testOrder);
         when(orderDataAccessor.saveOrder(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(stateHandlerRegistry.canTransition(Order.Status.PENDING, Order.Status.PAID)).thenReturn(true);
 
         OrderResponse response = orderService.updateOrderStatus(1L, Order.Status.PAID);
 
         assertNotNull(response);
         assertEquals("PAID", response.status());
+        verify(eventPublisher).publishEvent(any(OrderStatusChangedEvent.class));
     }
 
     @Test
     void shouldThrowExceptionForInvalidStatusTransition() {
         when(orderDataAccessor.getOrder(1L)).thenReturn(testOrder);
+        when(stateHandlerRegistry.canTransition(Order.Status.PENDING, Order.Status.SHIPPED)).thenReturn(false);
 
         // 尝试从 PENDING 直接变成 SHIPPED（不合法）
         assertThrows(BusinessException.class, () -> orderService.updateOrderStatus(1L, Order.Status.SHIPPED));
@@ -179,6 +187,7 @@ class OrderServiceTest {
     void shouldCancelOrderAndRestoreStock() {
         when(orderDataAccessor.getOrder(1L)).thenReturn(testOrder);
         when(orderDataAccessor.saveOrder(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(stateHandlerRegistry.canTransition(Order.Status.PENDING, Order.Status.CANCELLED)).thenReturn(true);
 
         orderService.cancelOrder(1L);
 

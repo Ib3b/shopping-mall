@@ -1,16 +1,13 @@
 package com.example.shopping.web.controller;
 
-import com.example.shopping.common.dto.UserResponse;
 import com.example.shopping.facade.UserRpcService;
 import com.example.shopping.facade.dto.UserCreateRequest;
 import com.example.shopping.facade.dto.UserDTO;
+import com.example.shopping.facade.dto.PageDTO;
 import com.example.shopping.facade.dto.UserUpdateRequest;
-import com.example.shopping.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,11 +24,9 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserRpcService userRpcService;
-    private final UserService userService;
 
-    public UserController(UserRpcService userRpcService, UserService userService) {
+    public UserController(UserRpcService userRpcService) {
         this.userRpcService = userRpcService;
-        this.userService = userService;
     }
 
     /**
@@ -42,7 +37,7 @@ public class UserController {
      */
     @PostMapping
     @Operation(summary = "用户注册", description = "创建新用户")
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserCreateRequest request) {
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateRequest request) {
         UserDTO response = userRpcService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -63,14 +58,16 @@ public class UserController {
     /**
      * 分页获取所有用户
      *
-     * @param pageable 分页参数（默认每页10条）
+     * @param page 页码（从0开始，默认0）
+     * @param size 每页大小（默认10）
      * @return 用户分页列表
      */
     @GetMapping
     @Operation(summary = "获取所有用户", description = "分页获取用户列表")
-    public ResponseEntity<Page<UserResponse>> getAllUsers(
-            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
-        Page<UserResponse> users = userService.getAllUsers(pageable);
+    public ResponseEntity<PageDTO<UserDTO>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        PageDTO<UserDTO> users = userRpcService.getAllUsers(page, size);
         return ResponseEntity.ok(users);
     }
 
@@ -98,7 +95,7 @@ public class UserController {
     @Operation(summary = "更新用户", description = "更新用户信息")
     public ResponseEntity<UserDTO> updateUser(
             @PathVariable Long id,
-            @RequestBody UserUpdateRequest request) {
+            @Valid @RequestBody UserUpdateRequest request) {
         UserDTO response = userRpcService.updateUser(id, request);
         return ResponseEntity.ok(response);
     }

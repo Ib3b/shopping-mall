@@ -1,18 +1,14 @@
 package com.example.shopping.controller;
 
-import com.example.shopping.common.dto.ProductResponse;
 import com.example.shopping.facade.ProductRpcService;
+import com.example.shopping.facade.dto.PageDTO;
 import com.example.shopping.facade.dto.ProductCreateRequest;
 import com.example.shopping.facade.dto.ProductDTO;
-import com.example.shopping.product.service.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -41,9 +37,6 @@ class ProductControllerTest {
 
     @MockitoBean
     private ProductRpcService productRpcService;
-
-    @MockitoBean
-    private ProductService productService;
 
     @Test
     void shouldCreateProduct() throws Exception {
@@ -76,13 +69,13 @@ class ProductControllerTest {
 
     @Test
     void shouldGetAllProducts() throws Exception {
-        ProductResponse product1 = new ProductResponse(1L, "商品1", "描述1", new BigDecimal("10"), 10, "分类1",
+        ProductDTO product1 = new ProductDTO(1L, "商品1", "描述1", new BigDecimal("10"), 10, "分类1",
             LocalDateTime.now(), LocalDateTime.now());
-        ProductResponse product2 = new ProductResponse(2L, "商品2", "描述2", new BigDecimal("20"), 20, "分类2",
+        ProductDTO product2 = new ProductDTO(2L, "商品2", "描述2", new BigDecimal("20"), 20, "分类2",
             LocalDateTime.now(), LocalDateTime.now());
 
-        Page<ProductResponse> page = new PageImpl<>(List.of(product1, product2));
-        when(productService.getAllProducts(any(PageRequest.class))).thenReturn(page);
+        PageDTO<ProductDTO> page = new PageDTO<>(List.of(product1, product2), 0, 10, 2, 1, true, true);
+        when(productRpcService.getAllProducts(0, 10)).thenReturn(page);
 
         mockMvc.perform(get("/api/products"))
             .andExpect(status().isOk())

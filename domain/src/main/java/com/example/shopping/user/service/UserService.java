@@ -11,6 +11,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,9 +30,11 @@ public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -51,7 +54,8 @@ public class UserService {
             throw new BusinessException("邮箱已被注册");
         }
 
-        User user = new User(request.username(), request.email(), request.password());
+        String encodedPassword = passwordEncoder.encode(request.password());
+        User user = new User(request.username(), request.email(), encodedPassword);
         User saved = userRepository.save(user);
         logger.info("创建新用户: {}", saved.getUsername());
 
@@ -129,7 +133,7 @@ public class UserService {
         user.setUsername(request.username());
         user.setEmail(request.email());
         if (request.password() != null && !request.password().isEmpty()) {
-            user.setPassword(request.password());
+            user.setPassword(passwordEncoder.encode(request.password()));
         }
 
         User saved = userRepository.save(user);
