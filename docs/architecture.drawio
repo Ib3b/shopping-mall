@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel>
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- facade - 绿色容器 -->
+    <mxCell id="2" value="&lt;b&gt;facade&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#666666&quot;&gt;RPC接口层，纯接口+DTO，零外部依赖&lt;/font&gt;" style="swimlane;startSize=36;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;rounded=1;shadow=1;html=1;whiteSpace=wrap;verticalAlign=top;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="40" y="40" width="320" height="140" as="geometry" />
+    </mxCell>
+
+    <!-- starter - 琥珀色容器 -->
+    <mxCell id="3" value="&lt;b&gt;starter&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#666666&quot;&gt;自定义 Spring Boot Starter，可选集成到domain&lt;/font&gt;" style="swimlane;startSize=36;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#333333;rounded=1;shadow=1;html=1;whiteSpace=wrap;verticalAlign=top;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="420" y="40" width="320" height="140" as="geometry" />
+    </mxCell>
+
+    <!-- domain - 蓝色容器 -->
+    <mxCell id="4" value="&lt;b&gt;domain&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#666666&quot;&gt;业务领域层：Entity / Repository / Service&lt;/font&gt;" style="swimlane;startSize=36;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#333333;rounded=1;shadow=1;html=1;whiteSpace=wrap;verticalAlign=top;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="140" y="260" width="500" height="160" as="geometry" />
+    </mxCell>
+
+    <!-- web - 紫色容器 -->
+    <mxCell id="5" value="&lt;b&gt;web&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#666666&quot;&gt;HTTP接口层：Controller + 适配器&lt;/font&gt;" style="swimlane;startSize=36;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#333333;rounded=1;shadow=1;html=1;whiteSpace=wrap;verticalAlign=top;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="140" y="500" width="500" height="160" as="geometry" />
+    </mxCell>
+
+    <!-- app - 红色容器 -->
+    <mxCell id="6" value="&lt;b&gt;app&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#666666&quot;&gt;主应用入口：启动与装配&lt;/font&gt;" style="swimlane;startSize=36;fillColor=#f8cecc;strokeColor=#b85450;fontColor=#333333;rounded=1;shadow=1;html=1;whiteSpace=wrap;verticalAlign=top;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="140" y="740" width="500" height="150" as="geometry" />
+    </mxCell>
+
+    <!-- facade → domain -->
+    <mxCell id="7" value="&lt;b&gt;domain 实现 facade 接口&lt;/b&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endFill=1;strokeWidth=2;fontSize=12;fontColor=#333333;" edge="1" parent="1" source="2" target="4">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- starter → domain -->
+    <mxCell id="8" value="&lt;b&gt;starter 可选集成到 domain&lt;/b&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endFill=1;strokeWidth=2;fontSize=12;fontColor=#333333;" edge="1" parent="1" source="3" target="4">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- domain → web -->
+    <mxCell id="9" value="&lt;b&gt;web 调用 domain 的 RpcService&lt;/b&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endFill=1;strokeWidth=2;fontSize=12;fontColor=#333333;" edge="1" parent="1" source="4" target="5">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- web → app -->
+    <mxCell id="10" value="&lt;b&gt;app 依赖 web&lt;/b&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endFill=1;strokeWidth=2;fontSize=12;fontColor=#333333;" edge="1" parent="1" source="5" target="6">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+  </root>
+</mxGraphModel>

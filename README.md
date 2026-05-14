@@ -34,40 +34,14 @@ shopping-mall/
 
 ### 模块依赖关系
 
-```mermaid
-graph TB
-    subgraph " "
-        direction TB
-        F[fa:fa-cube facade<br/>RPC 接口定义<br/>纯接口 + DTO 记录<br/>零外部依赖] 
-        S[fa:fa-cog starter<br/>自定义 Starter<br/>自动配置示例<br/>spring-boot-starter]
-    end
+模块架构图由 draw.io 绘制，可在线查看或编辑：
 
-    subgraph " "
-        direction TB
-        D[fa:fa-database domain<br/>业务领域层<br/>Entity / Repository / Service<br/>JPA + 缓存 + 校验]
-    end
+[![模块依赖关系图](docs/architecture.drawio)](docs/architecture.drawio)
 
-    subgraph " "
-        direction TB
-        W[fa:fa-globe web<br/>HTTP 接口层<br/>Controller + 适配器<br/>OpenAPI 文档 + 邮件]
-    end
-
-    subgraph " "
-        direction TB
-        A[fa:fa-rocket app<br/>主应用入口<br/>Spring Boot 启动<br/>全局配置]
-    end
-
-    F -->|实现| D
-    S -.->|可选集成| D
-    D -->|Controller 调用| W
-    W -->|依赖| A
-
-    style F fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20,rounded
-    style S fill:#FFF8E1,stroke:#F57C00,stroke-width:2px,color:#E65100,rounded
-    style D fill:#E3F2FD,stroke:#1565C0,stroke-width:2px,color:#0D47A1,rounded
-    style W fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px,color:#4A148C,rounded
-    style A fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#B71C1C,rounded
-```
+> 上图使用 [draw.io](https://app.diagrams.net/) 绘制。
+> 编辑方式：下载文件后在 [app.diagrams.net](https://app.diagrams.net/) 中打开 `docs/architecture.drawio`，
+> 或使用 VS Code 的 Draw.io Integration 插件直接编辑。
+> 也可通过 `claude mcp` 集成的 drawio MCP 工具自动生成。
 
 ### 模块职责
 
