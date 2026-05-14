@@ -3,6 +3,7 @@ package com.example.shopping.domain.impl;
 import com.example.shopping.common.dto.OrderRequest;
 import com.example.shopping.common.dto.OrderResponse;
 import com.example.shopping.common.entity.Order;
+import com.example.shopping.domain.mapper.OrderMapper;
 import com.example.shopping.facade.OrderRpcService;
 import com.example.shopping.facade.dto.OrderCreateRequest;
 import com.example.shopping.facade.dto.OrderDTO;
@@ -30,9 +31,11 @@ public class OrderRpcServiceImpl implements OrderRpcService {
     private static final Logger logger = LoggerFactory.getLogger(OrderRpcServiceImpl.class);
 
     private final OrderService orderService;
+    private final OrderMapper orderMapper;
 
-    public OrderRpcServiceImpl(OrderService orderService) {
+    public OrderRpcServiceImpl(OrderService orderService, OrderMapper orderMapper) {
         this.orderService = orderService;
+        this.orderMapper = orderMapper;
     }
 
     /**
@@ -43,7 +46,7 @@ public class OrderRpcServiceImpl implements OrderRpcService {
         logger.info("[RPC] createOrder - userId: {}, productId: {}", request.userId(), request.productId());
         OrderRequest orderRequest = new OrderRequest(request.userId(), request.productId(), request.quantity());
         OrderResponse response = orderService.createOrder(orderRequest);
-        return toDTO(response);
+        return orderMapper.toDTO(response);
     }
 
     /**
@@ -53,7 +56,7 @@ public class OrderRpcServiceImpl implements OrderRpcService {
     public OrderDTO getOrderById(Long id) {
         logger.info("[RPC] getOrderById - id: {}", id);
         OrderResponse response = orderService.getOrderById(id);
-        return toDTO(response);
+        return orderMapper.toDTO(response);
     }
 
     /**
@@ -63,7 +66,7 @@ public class OrderRpcServiceImpl implements OrderRpcService {
     public List<OrderDTO> getAllOrders() {
         logger.info("[RPC] getAllOrders");
         return orderService.getAllOrders().stream()
-            .map(this::toDTO)
+            .map(orderMapper::toDTO)
             .toList();
     }
 
@@ -75,7 +78,7 @@ public class OrderRpcServiceImpl implements OrderRpcService {
         logger.info("[RPC] getAllOrders (paged) - page: {}, size: {}", pageNumber, pageSize);
         Page<OrderResponse> page = orderService.getAllOrders(PageRequest.of(pageNumber, pageSize));
         List<OrderDTO> content = page.getContent().stream()
-            .map(this::toDTO)
+            .map(orderMapper::toDTO)
             .toList();
         return new PageDTO<>(
             content,
@@ -95,7 +98,7 @@ public class OrderRpcServiceImpl implements OrderRpcService {
     public List<OrderDTO> getOrdersByUserId(Long userId) {
         logger.info("[RPC] getOrdersByUserId - userId: {}", userId);
         return orderService.getOrdersByUserId(userId).stream()
-            .map(this::toDTO)
+            .map(orderMapper::toDTO)
             .toList();
     }
 
@@ -106,7 +109,7 @@ public class OrderRpcServiceImpl implements OrderRpcService {
     public List<OrderDTO> getOrdersByStatus(OrderStatus status) {
         logger.info("[RPC] getOrdersByStatus - status: {}", status);
         return orderService.getOrdersByStatus(toEntityStatus(status)).stream()
-            .map(this::toDTO)
+            .map(orderMapper::toDTO)
             .toList();
     }
 
@@ -117,7 +120,7 @@ public class OrderRpcServiceImpl implements OrderRpcService {
     public OrderDTO updateOrderStatus(Long orderId, OrderStatus newStatus) {
         logger.info("[RPC] updateOrderStatus - orderId: {}, newStatus: {}", orderId, newStatus);
         OrderResponse response = orderService.updateOrderStatus(orderId, toEntityStatus(newStatus));
-        return toDTO(response);
+        return orderMapper.toDTO(response);
     }
 
     /**
@@ -136,28 +139,6 @@ public class OrderRpcServiceImpl implements OrderRpcService {
     public Long getUserOrderCount(Long userId) {
         logger.info("[RPC] getUserOrderCount - userId: {}", userId);
         return orderService.getUserOrderCount(userId);
-    }
-
-    /**
-     * 将领域层响应转换为 facade 层 DTO
-     *
-     * @param response 领域层订单响应
-     * @return facade 层订单 DTO
-     */
-    private OrderDTO toDTO(OrderResponse response) {
-        return new OrderDTO(
-            response.id(),
-            response.userId(),
-            response.username(),
-            response.productId(),
-            response.productName(),
-            response.quantity(),
-            response.totalPrice(),
-            response.status(),
-            response.statusDescription(),
-            response.createdAt(),
-            response.updatedAt()
-        );
     }
 
     /**

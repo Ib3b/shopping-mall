@@ -2,6 +2,7 @@ package com.example.shopping.domain.impl;
 
 import com.example.shopping.common.dto.UserRequest;
 import com.example.shopping.common.dto.UserResponse;
+import com.example.shopping.domain.mapper.UserMapper;
 import com.example.shopping.facade.UserRpcService;
 import com.example.shopping.facade.dto.UserCreateRequest;
 import com.example.shopping.facade.dto.UserDTO;
@@ -29,9 +30,11 @@ public class UserRpcServiceImpl implements UserRpcService {
     private static final Logger logger = LoggerFactory.getLogger(UserRpcServiceImpl.class);
 
     private final UserService userService;
+    private final UserMapper userMapper;
 
-    public UserRpcServiceImpl(UserService userService) {
+    public UserRpcServiceImpl(UserService userService, UserMapper userMapper) {
         this.userService = userService;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -42,7 +45,7 @@ public class UserRpcServiceImpl implements UserRpcService {
         logger.info("[RPC] createUser - username: {}", request.username());
         UserRequest userRequest = new UserRequest(request.username(), request.email(), request.password());
         UserResponse response = userService.createUser(userRequest);
-        return toDTO(response);
+        return userMapper.toDTO(response);
     }
 
     /**
@@ -52,7 +55,7 @@ public class UserRpcServiceImpl implements UserRpcService {
     public UserDTO getUserById(Long id) {
         logger.info("[RPC] getUserById - id: {}", id);
         UserResponse response = userService.getUserById(id);
-        return toDTO(response);
+        return userMapper.toDTO(response);
     }
 
     /**
@@ -62,7 +65,7 @@ public class UserRpcServiceImpl implements UserRpcService {
     public UserDTO getUserByUsername(String username) {
         logger.info("[RPC] getUserByUsername - username: {}", username);
         UserResponse response = userService.getUserByUsername(username);
-        return toDTO(response);
+        return userMapper.toDTO(response);
     }
 
     /**
@@ -72,7 +75,7 @@ public class UserRpcServiceImpl implements UserRpcService {
     public List<UserDTO> getAllUsers() {
         logger.info("[RPC] getAllUsers");
         return userService.getAllUsers().stream()
-            .map(this::toDTO)
+            .map(userMapper::toDTO)
             .toList();
     }
 
@@ -84,7 +87,7 @@ public class UserRpcServiceImpl implements UserRpcService {
         logger.info("[RPC] getAllUsers (paged) - page: {}, size: {}", pageNumber, pageSize);
         Page<UserResponse> page = userService.getAllUsers(PageRequest.of(pageNumber, pageSize));
         List<UserDTO> content = page.getContent().stream()
-            .map(this::toDTO)
+            .map(userMapper::toDTO)
             .toList();
         return new PageDTO<>(
             content,
@@ -114,21 +117,7 @@ public class UserRpcServiceImpl implements UserRpcService {
         logger.info("[RPC] updateUser - id: {}", id);
         UserRequest userRequest = new UserRequest(request.username(), request.email(), request.password());
         UserResponse response = userService.updateUser(id, userRequest);
-        return toDTO(response);
+        return userMapper.toDTO(response);
     }
 
-    /**
-     * 将领域层响应转换为 facade 层 DTO
-     *
-     * @param response 领域层用户响应
-     * @return facade 层用户 DTO
-     */
-    private UserDTO toDTO(UserResponse response) {
-        return new UserDTO(
-            response.id(),
-            response.username(),
-            response.email(),
-            response.createdAt()
-        );
-    }
 }

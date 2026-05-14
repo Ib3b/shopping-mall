@@ -14,7 +14,7 @@
 
     <groupId>io.github.ib3b</groupId>
     <artifactId>shopping-mall-parent</artifactId>
-    <version>1.0.2</version>
+    <version>1.1.0</version>
     <packaging>pom</packaging>
     <name>claude-train</name>
     <description>Spring Boot 多模块示例工程</description>
@@ -41,13 +41,16 @@
     </scm>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
         <springdoc.version>2.8.6</springdoc.version>
         <sqlite.version>3.45.1.0</sqlite.version>
         <gatling.version>3.13.5</gatling.version>
         <gatling-maven-plugin.version>4.21.0</gatling-maven-plugin.version>
         <scala.version>2.13.16</scala.version>
-        <mockito-inline.version>5.2.0</mockito-inline.version>
+        <scala-maven-plugin.version>4.9.2</scala-maven-plugin.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
     </properties>
 
     <modules>
@@ -57,17 +60,6 @@
         <module>web</module>
         <module>app</module>
     </modules>
-
-    <dependencyManagement>
-        <dependencies>
-            <!-- Mockito for JDK 21+ -->
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-inline</artifactId>
-                <version>${mockito-inline.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <distributionManagement>
         <repository>

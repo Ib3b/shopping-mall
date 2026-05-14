@@ -16,6 +16,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -43,6 +46,10 @@ class OrderServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Mock(lenient = true)
+    private PlatformTransactionManager transactionManager;
+
+    private TransactionStatus transactionStatus;
     private OrderService orderService;
 
     private User testUser;
@@ -51,7 +58,11 @@ class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        orderService = new OrderService(orderDataAccessor, productService, stateHandlerRegistry, eventPublisher);
+        transactionStatus = mock(TransactionStatus.class);
+        lenient().when(transactionManager.getTransaction(any(TransactionDefinition.class)))
+            .thenReturn(transactionStatus);
+        orderService = new OrderService(orderDataAccessor, productService, stateHandlerRegistry,
+            eventPublisher, transactionManager);
 
         testUser = new User("testuser", "test@example.com", "password123");
         testUser.setId(1L);

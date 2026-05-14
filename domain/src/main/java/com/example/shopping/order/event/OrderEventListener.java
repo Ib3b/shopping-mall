@@ -1,7 +1,7 @@
 package com.example.shopping.order.event;
 
 import com.example.shopping.common.entity.Order;
-import com.example.shopping.order.service.MailService;
+import com.example.shopping.order.port.NotificationSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -20,10 +20,10 @@ public class OrderEventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderEventListener.class);
 
-    private final MailService mailService;
+    private final NotificationSender notificationSender;
 
-    public OrderEventListener(MailService mailService) {
-        this.mailService = mailService;
+    public OrderEventListener(NotificationSender notificationSender) {
+        this.notificationSender = notificationSender;
     }
 
     /**
@@ -39,7 +39,7 @@ public class OrderEventListener {
     public void onOrderCreated(OrderCreatedEvent event) {
         Order order = event.getOrder();
         logger.info("收到订单创建事件 - 订单ID: {}", order.getId());
-        mailService.sendOrderConfirmation(order);
+        notificationSender.sendOrderConfirmation(order);
     }
 
     /**
@@ -56,6 +56,6 @@ public class OrderEventListener {
         Order order = event.getOrder();
         logger.info("收到订单状态变更事件 - 订单ID: {}, {} -> {}",
             order.getId(), event.getOldStatus(), event.getNewStatus());
-        mailService.sendOrderStatusUpdate(order);
+        notificationSender.sendOrderStatusUpdate(order);
     }
 }

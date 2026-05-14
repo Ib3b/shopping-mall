@@ -2,6 +2,7 @@ package com.example.shopping.domain.impl;
 
 import com.example.shopping.common.dto.ProductRequest;
 import com.example.shopping.common.dto.ProductResponse;
+import com.example.shopping.domain.mapper.ProductMapper;
 import com.example.shopping.facade.ProductRpcService;
 import com.example.shopping.facade.dto.PageDTO;
 import com.example.shopping.facade.dto.ProductCreateRequest;
@@ -29,9 +30,11 @@ public class ProductRpcServiceImpl implements ProductRpcService {
     private static final Logger logger = LoggerFactory.getLogger(ProductRpcServiceImpl.class);
 
     private final ProductService productService;
+    private final ProductMapper productMapper;
 
-    public ProductRpcServiceImpl(ProductService productService) {
+    public ProductRpcServiceImpl(ProductService productService, ProductMapper productMapper) {
         this.productService = productService;
+        this.productMapper = productMapper;
     }
 
     /**
@@ -44,7 +47,7 @@ public class ProductRpcServiceImpl implements ProductRpcService {
             request.name(), request.description(), request.price(), request.stock(), request.category()
         );
         ProductResponse response = productService.createProduct(productRequest);
-        return toDTO(response);
+        return productMapper.toDTO(response);
     }
 
     /**
@@ -54,7 +57,7 @@ public class ProductRpcServiceImpl implements ProductRpcService {
     public ProductDTO getProductById(Long id) {
         logger.info("[RPC] getProductById - id: {}", id);
         ProductResponse response = productService.getProductById(id);
-        return toDTO(response);
+        return productMapper.toDTO(response);
     }
 
     /**
@@ -64,7 +67,7 @@ public class ProductRpcServiceImpl implements ProductRpcService {
     public List<ProductDTO> getAllProducts() {
         logger.info("[RPC] getAllProducts");
         return productService.getAllProducts().stream()
-            .map(this::toDTO)
+            .map(productMapper::toDTO)
             .toList();
     }
 
@@ -76,7 +79,7 @@ public class ProductRpcServiceImpl implements ProductRpcService {
         logger.info("[RPC] getAllProducts (paged) - page: {}, size: {}", pageNumber, pageSize);
         Page<ProductResponse> page = productService.getAllProducts(PageRequest.of(pageNumber, pageSize));
         List<ProductDTO> content = page.getContent().stream()
-            .map(this::toDTO)
+            .map(productMapper::toDTO)
             .toList();
         return new PageDTO<>(
             content,
@@ -96,7 +99,7 @@ public class ProductRpcServiceImpl implements ProductRpcService {
     public List<ProductDTO> getProductsByCategory(String category) {
         logger.info("[RPC] getProductsByCategory - category: {}", category);
         return productService.getProductsByCategory(category).stream()
-            .map(this::toDTO)
+            .map(productMapper::toDTO)
             .toList();
     }
 
@@ -107,7 +110,7 @@ public class ProductRpcServiceImpl implements ProductRpcService {
     public List<ProductDTO> searchProducts(String keyword) {
         logger.info("[RPC] searchProducts - keyword: {}", keyword);
         return productService.searchProducts(keyword).stream()
-            .map(this::toDTO)
+            .map(productMapper::toDTO)
             .toList();
     }
 
@@ -127,7 +130,7 @@ public class ProductRpcServiceImpl implements ProductRpcService {
     public List<ProductDTO> getInStockProducts() {
         logger.info("[RPC] getInStockProducts");
         return productService.getInStockProducts().stream()
-            .map(this::toDTO)
+            .map(productMapper::toDTO)
             .toList();
     }
 
@@ -141,25 +144,7 @@ public class ProductRpcServiceImpl implements ProductRpcService {
             request.name(), request.description(), request.price(), request.stock(), request.category()
         );
         ProductResponse response = productService.updateProduct(id, productRequest);
-        return toDTO(response);
+        return productMapper.toDTO(response);
     }
 
-    /**
-     * 将领域层响应转换为 facade 层 DTO
-     *
-     * @param response 领域层商品响应
-     * @return facade 层商品 DTO
-     */
-    private ProductDTO toDTO(ProductResponse response) {
-        return new ProductDTO(
-            response.id(),
-            response.name(),
-            response.description(),
-            response.price(),
-            response.stock(),
-            response.category(),
-            response.createdAt(),
-            response.updatedAt()
-        );
-    }
 }

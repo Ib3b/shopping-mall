@@ -33,6 +33,17 @@ public class BusinessException extends RuntimeException {
     }
 
     /**
+     * 创建业务异常（带原始 cause）
+     *
+     * @param message 错误信息
+     * @param cause   原始异常
+     */
+    public BusinessException(String message, Throwable cause) {
+        super(message, cause);
+        this.code = "BUSINESS_ERROR";
+    }
+
+    /**
      * 获取错误码
      *
      * @return 错误码

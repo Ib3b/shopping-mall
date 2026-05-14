@@ -1,5 +1,6 @@
-package com.example.shopping.common.exception;
+package com.example.shopping.web.controller;
 
+import com.example.shopping.common.exception.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -13,23 +14,11 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 全局异常处理器
- * <p>
- * 统一处理控制器层抛出的各种异常，返回标准化的错误响应。
- * </p>
- */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    /**
-     * 处理业务异常
-     *
-     * @param ex 业务异常
-     * @return 错误响应
-     */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Map<String, Object>> handleBusinessException(BusinessException ex) {
         logger.warn("业务异常: {}", ex.getMessage());
@@ -44,12 +33,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(body);
     }
 
-    /**
-     * 处理参数校验异常
-     *
-     * @param ex 参数校验异常
-     * @return 错误响应
-     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationException(
             MethodArgumentNotValidException ex) {
@@ -70,12 +53,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(body);
     }
 
-    /**
-     * 处理非法参数异常
-     *
-     * @param ex 非法参数异常
-     * @return 错误响应
-     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(
             IllegalArgumentException ex) {
@@ -91,12 +68,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(body);
     }
 
-    /**
-     * 处理其他未捕获异常
-     *
-     * @param ex 异常
-     * @return 错误响应
-     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
         logger.error("系统异常: ", ex);
