@@ -15,7 +15,7 @@
     <img src="https://img.shields.io/github/v/release/Ib3b/shopping-mall?style=flat-square&logo=github" alt="Release">
   </a>
   <img src="https://img.shields.io/badge/Spring%20Boot-3.5.11-6DB33F?style=flat-square&logo=springboot" alt="Spring Boot">
-  <img src="https://img.shields.io/badge/JDK-21-007396?style=flat-square&logo=openjdk" alt="JDK">
+  <img src="https://img.shields.io/badge/JDK-25-007396?style=flat-square&logo=openjdk" alt="JDK">
   <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License">
 </p>
 
