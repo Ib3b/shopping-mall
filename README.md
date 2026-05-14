@@ -34,14 +34,9 @@ shopping-mall/
 
 ### 模块依赖关系
 
-模块架构图由 draw.io 绘制，可在线查看或编辑：
-
-[![模块依赖关系图](docs/architecture.drawio)](docs/architecture.drawio)
-
-> 上图使用 [draw.io](https://app.diagrams.net/) 绘制。
-> 编辑方式：下载文件后在 [app.diagrams.net](https://app.diagrams.net/) 中打开 `docs/architecture.drawio`，
-> 或使用 VS Code 的 Draw.io Integration 插件直接编辑。
-> 也可通过 `claude mcp` 集成的 drawio MCP 工具自动生成。
+<p align="center">
+  <img src="docs/architecture.svg" alt="模块依赖关系图" width="600">
+</p>
 
 ### 模块职责
 
