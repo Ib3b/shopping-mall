@@ -45,7 +45,6 @@ public class UserService {
      * @throws BusinessException 当用户名或邮箱已存在时抛出
      */
     @Transactional
-    @CacheEvict(value = "userCache", allEntries = true)
     public UserResponse createUser(UserRequest request) {
         if (userRepository.existsByUsername(request.username())) {
             throw new BusinessException("用户名已存在");
@@ -149,7 +148,7 @@ public class UserService {
      * @throws BusinessException 当用户不存在时抛出
      */
     @Transactional
-    @CacheEvict(value = "userCache", allEntries = true)
+    @CacheEvict(value = "userCache", key = "#id")
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new BusinessException("用户不存在");

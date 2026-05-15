@@ -33,3 +33,5 @@ CREATE TABLE orders (
     FOREIGN KEY (user_id) REFERENCES user_info(id),
     FOREIGN KEY (product_id) REFERENCES product(id)
 );
+
+CREATE INDEX IF NOT EXISTS idx_order_product ON orders(product_id);

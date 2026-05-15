@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -26,6 +27,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 /**
@@ -203,6 +206,45 @@ class OrderServiceTest {
         orderService.cancelOrder(1L);
 
         verify(productService).updateStock(1L, -2);
+    }
+
+    @Test
+    void shouldRetryOnOptimisticLockAndSucceed() {
+        OrderRequest request = new OrderRequest(1L, 1L, 2);
+
+        when(orderDataAccessor.getUser(1L)).thenReturn(testUser);
+        when(orderDataAccessor.getProduct(1L)).thenReturn(testProduct);
+        when(orderDataAccessor.saveOrder(any(Order.class)))
+            .thenThrow(new OptimisticLockingFailureException("conflict"))
+            .thenAnswer(invocation -> {
+                Order order = invocation.getArgument(0);
+                order.setId(1L);
+                return order;
+            });
+
+        OrderResponse response = orderService.createOrder(request);
+
+        assertNotNull(response);
+        assertEquals(1L, response.id());
+        verify(orderDataAccessor, times(2)).getUser(1L);
+        verify(orderDataAccessor, times(2)).saveOrder(any(Order.class));
+        verify(productService).updateStock(1L, 2);
+        verify(eventPublisher).publishEvent(any(OrderCreatedEvent.class));
+    }
+
+    @Test
+    void shouldThrowBusinessExceptionAfterMaxRetries() {
+        OrderRequest request = new OrderRequest(1L, 1L, 2);
+
+        when(orderDataAccessor.getUser(1L)).thenReturn(testUser);
+        when(orderDataAccessor.getProduct(1L)).thenReturn(testProduct);
+        when(orderDataAccessor.saveOrder(any(Order.class)))
+            .thenThrow(new OptimisticLockingFailureException("conflict"));
+
+        BusinessException ex = assertThrows(BusinessException.class,
+            () -> orderService.createOrder(request));
+        assertEquals("系统繁忙，请稍后重试", ex.getMessage());
+        verify(productService, times(0)).updateStock(anyLong(), anyInt());
     }
 
     @Test

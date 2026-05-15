@@ -10,7 +10,7 @@ spring:
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       maximum-pool-size: 3
-      minimum-idle: 5
+      minimum-idle: 1
       connection-timeout: 60000
       idle-timeout: 600000
       max-lifetime: 1800000
@@ -33,10 +33,9 @@ spring:
       schema-locations: classpath:schema.sql
       data-locations: classpath:data.sql
 
+  # 缓存配置由 CacheConfig.java 统一管理（Caffeine maximumSize=1000, expireAfterWrite=300s）
   cache:
     cache-names: userCache,productCache
-    caffeine:
-      spec: maximumSize=1000,expireAfterWrite=300s
 
   # 静态资源配置
   web:

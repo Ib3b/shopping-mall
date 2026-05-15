@@ -42,7 +42,6 @@ public class ProductService {
      * @return 商品响应
      */
     @Transactional
-    @CacheEvict(value = "productCache", allEntries = true)
     public ProductResponse createProduct(ProductRequest request) {
         Product product = new Product(
             request.name(),
@@ -152,7 +151,7 @@ public class ProductService {
      * @throws BusinessException 当商品不存在时抛出
      */
     @Transactional
-    @CacheEvict(value = "productCache", allEntries = true)
+    @CachePut(value = "productCache", key = "#id")
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         Product product = productRepository.findById(id)
             .orElseThrow(() -> new BusinessException("商品不存在"));
@@ -176,7 +175,7 @@ public class ProductService {
      * @throws BusinessException 当商品不存在时抛出
      */
     @Transactional
-    @CacheEvict(value = "productCache", allEntries = true)
+    @CacheEvict(value = "productCache", key = "#id")
     public void deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
             throw new BusinessException("商品不存在");
