@@ -1,35 +1,19 @@
 package com.example.shopping.facade.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 
-/**
- * 分页响应 DTO
- * <p>
- * 用于封装分页查询结果，避免依赖 Spring Data。
- * </p>
- *
- * @param <T> 数据类型
- */
+@Schema(description = "分页响应")
 public record PageDTO<T>(
-    List<T> content,
-    int pageNumber,
-    int pageSize,
-    long totalElements,
-    int totalPages,
-    boolean first,
-    boolean last
+    @Schema(description = "数据列表") List<T> content,
+    @Schema(description = "当前页码（从0开始）", example = "0") int pageNumber,
+    @Schema(description = "每页大小", example = "10") int pageSize,
+    @Schema(description = "总记录数", example = "100") long totalElements,
+    @Schema(description = "总页数", example = "10") int totalPages,
+    @Schema(description = "是否第一页", example = "true") boolean first,
+    @Schema(description = "是否最后一页", example = "false") boolean last
 ) {
-    /**
-     * 判断是否有下一页
-     */
-    public boolean hasNext() {
-        return !last;
-    }
-
-    /**
-     * 判断是否有上一页
-     */
-    public boolean hasPrevious() {
-        return !first;
-    }
+    public boolean hasNext() { return !last; }
+    public boolean hasPrevious() { return !first; }
 }
