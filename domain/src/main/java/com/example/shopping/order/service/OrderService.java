@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
@@ -187,28 +188,33 @@ public class OrderService {
     // 查询接口（读操作无需事务重试）
     // ============================================================
 
+    @Transactional(readOnly = true)
     public OrderResponse getOrderById(Long id) {
         Order order = orderDataAccessor.getOrder(id);
         return toResponse(order);
     }
 
+    @Transactional(readOnly = true)
     public List<OrderResponse> getOrdersByUserId(Long userId) {
         return orderDataAccessor.getOrdersByUserId(userId).stream()
             .map(this::toResponse)
             .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<OrderResponse> getOrdersByStatus(Order.Status status) {
         return orderDataAccessor.getOrdersByStatus(status).stream()
             .map(this::toResponse)
             .toList();
     }
 
+    @Transactional(readOnly = true)
     public Page<OrderResponse> getAllOrders(Pageable pageable) {
         return orderDataAccessor.getAllOrders(pageable)
             .map(this::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public List<OrderResponse> getAllOrders() {
         return orderDataAccessor.getAllOrders().stream()
             .map(this::toResponse)
