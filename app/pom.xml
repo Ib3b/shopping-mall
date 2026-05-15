@@ -45,6 +45,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Spring Security Test (for @WithMockUser etc.) -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Gatling -->
         <dependency>
             <groupId>io.gatling.highcharts</groupId>

@@ -158,6 +158,23 @@ public class UserService {
     }
 
     /**
+     * 验证用户凭证
+     *
+     * @param username 用户名
+     * @param rawPassword 明文密码
+     * @return 用户ID
+     * @throws BusinessException 当用户不存在或密码不匹配时抛出
+     */
+    public Long verifyCredentials(String username, String rawPassword) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new BusinessException("用户名或密码错误"));
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            throw new BusinessException("用户名或密码错误");
+        }
+        return user.getId();
+    }
+
+    /**
      * 将用户实体转换为响应DTO
      *
      * @param user 用户实体
