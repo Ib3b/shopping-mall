@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:sqlite:shopping-dev.db
+    url: jdbc:sqlite:shopping-dev.db?busy_timeout=5000&journal_mode=WAL
     hikari:
       maximum-pool-size: 5
       minimum-idle: 1

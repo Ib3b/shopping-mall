@@ -9,8 +9,11 @@ import com.example.shopping.web.config.CurrentUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +27,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/orders")
+@Validated
 @Tag(name = "订单管理", description = "订单创建、查询、状态管理接口")
 public class OrderController {
 
@@ -74,8 +78,8 @@ public class OrderController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "获取所有订单", description = "分页获取订单列表")
     public ResponseEntity<PageDTO<OrderDTO>> getAllOrders(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
         PageDTO<OrderDTO> orders = orderRpcService.getAllOrders(page, size);
         return ResponseEntity.ok(orders);
     }

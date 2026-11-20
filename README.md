@@ -108,8 +108,9 @@ JPA Repository / NotificationSender  (数据持久化 / 基础设施)
 | 📧 邮件服务 | 异步邮件通知（模拟/真实发送） |
 | 📖 API 文档 | Swagger UI（/swagger-ui.html） |
 | 🔧 自定义 Starter | 演示 Spring Boot Starter 自动配置 |
-| 🗄️ 数据库 | SQLite 运行环境 / H2 测试环境 |
+| 🗄️ 数据库 | SQLite 运行环境 / H2 测试环境，幂等 schema/种子数据 |
 | 🔒 乐观锁重试 | 并发冲突自动检测 + 指数退避重试 |
+| 🛡️ 认证授权 | JWT + USER/ADMIN 角色 + 资源归属校验 |
 
 ## 快速开始
 
@@ -117,10 +118,14 @@ JPA Repository / NotificationSender  (数据持久化 / 基础设施)
 # 构建项目
 mvn clean package
 
-# 启动应用
-cd app && mvn spring-boot:run
+# 启动应用（dev profile）
+cd app && mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
-# 运行测试
+# 生产 profile：必须提供至少 32 字节的 JWT_SECRET
+JWT_SECRET=replace-with-a-32-byte-secret \
+  mvn spring-boot:run -Dspring-boot.run.profiles=prod
+
+# 运行测试（全部使用 H2 + test profile）
 mvn test
 
 # 运行单个测试
@@ -152,6 +157,27 @@ mvn gatling:test -pl app
 | API | http://localhost:8080 |
 | Swagger UI | http://localhost:8080/swagger-ui.html |
 | Actuator | http://localhost:8080/actuator/health |
+
+## 认证与授权
+
+- 登录：`POST /api/auth/login`，请求体 `{"username":"user1","password":"password1"}`，返回 JWT。
+- 注册：`POST /api/auth/register`，新用户默认 `USER` 角色。
+- 请求头：`Authorization: Bearer <token>`。
+- 种子管理员：`user1 / password1`（其余 `user2..user20` 为普通用户，密码 `password2..password20`）。
+
+| 操作 | USER | ADMIN |
+|------|:----:|:-----:|
+| 商品查询 | ✓ | ✓ |
+| 商品创建/更新/删除 |  | ✓ |
+| 创建自己的订单、查看/取消自己的订单 | ✓ | ✓ |
+| 查看全部订单、按状态查询、修改订单状态 |  | ✓ |
+| 查看/创建/删除用户、查看任意用户 |  | ✓ |
+| 更新自己的资料 | ✓ | ✓ |
+| `/actuator/health` | 公开（无详情） | 公开（含详情） |
+
+`jwt.secret` 必须至少 32 字节；dev/test 使用内置值，生产从环境变量 `JWT_SECRET` 注入，缺失时启动失败。
+
+> 升级提示：旧版本本地数据库没有 `role` 列，直接删除 `shopping-dev.db` / `shopping.db` 后重启即可，种子数据会幂等重建。
 
 ## API 端点
 

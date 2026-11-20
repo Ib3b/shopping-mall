@@ -8,8 +8,11 @@ import com.example.shopping.facade.dto.ProductUpdateRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +26,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/products")
+@Validated
 @Tag(name = "商品管理", description = "商品CRUD、库存管理接口")
 public class ProductController {
 
@@ -69,8 +73,8 @@ public class ProductController {
     @GetMapping
     @Operation(summary = "获取所有商品", description = "分页获取商品列表")
     public ResponseEntity<PageDTO<ProductDTO>> getAllProducts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
         PageDTO<ProductDTO> products = productRpcService.getAllProducts(page, size);
         return ResponseEntity.ok(products);
     }

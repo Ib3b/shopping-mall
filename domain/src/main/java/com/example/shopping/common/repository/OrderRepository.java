@@ -1,6 +1,9 @@
 package com.example.shopping.common.repository;
 
 import com.example.shopping.common.entity.Order;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,6 +26,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @param userId 用户ID
      * @return 订单列表
      */
+    @EntityGraph(attributePaths = {"user", "product"})
     List<Order> findByUserId(Long userId);
 
     /**
@@ -31,7 +35,16 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @param status 订单状态
      * @return 订单列表
      */
+    @EntityGraph(attributePaths = {"user", "product"})
     List<Order> findByStatus(Order.Status status);
+
+    @Override
+    @EntityGraph(attributePaths = {"user", "product"})
+    Page<Order> findAll(Pageable pageable);
+
+    @Override
+    @EntityGraph(attributePaths = {"user", "product"})
+    List<Order> findAll();
 
     /**
      * 根据用户ID查找订单并按时间降序排列
@@ -39,6 +52,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @param userId 用户ID
      * @return 按时间降序排列的订单列表
      */
+    @EntityGraph(attributePaths = {"user", "product"})
     @Query("SELECT o FROM Order o WHERE o.user.id = :userId ORDER BY o.createdAt DESC")
     List<Order> findUserOrdersOrderByTime(@Param("userId") Long userId);
 

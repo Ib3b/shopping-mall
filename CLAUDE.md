@@ -30,11 +30,12 @@ mvn test -pl domain -am
 # Run Gatling performance tests (app must be running on port 8080)
 mvn gatling:test -pl app
 
-# Run the application (dev profile default)
-cd app && mvn spring-boot:run
+# Run the application (dev profile, explicit)
+cd app && mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
-# Run with prod profile
-cd app && mvn spring-boot:run -Dspring-boot.run.profiles=prod
+# Run with prod profile (JWT_SECRET must be at least 32 bytes)
+cd app && JWT_SECRET=replace-with-a-32-byte-secret \
+  mvn spring-boot:run -Dspring-boot.run.profiles=prod
 
 # Check dependency tree
 mvn dependency:tree
@@ -56,7 +57,7 @@ shopping-mall/                    (parent POM, packaging: pom)
 ### Module Dependencies
 
 ```
-facade (jakarta.validation-api only)
+facade (jakarta.validation-api + swagger-annotations, no Spring runtime)
    └── domain (facade + JPA + cache + validation + MapStruct)
             ├── web (domain + spring-web + springdoc + spring-mail)
             └── starter (独立 Spring Boot starter)
@@ -124,14 +125,23 @@ Uses Spring's `ApplicationEventPublisher` to fire `OrderCreatedEvent` and `Order
 
 ## Database
 
-- **Runtime**: SQLite via Hibernate `SQLiteDialect`, HikariCP pool size 3
-- **Test**: H2 in-memory database
-- **DDL**: `spring.jpa.hibernate.ddl-auto=update`
-- **Init**: `schema.sql` and `data.sql` execute on every startup
+- **Runtime**: SQLite via Hibernate `SQLiteDialect`, HikariCP pool size 5, `busy_timeout=5000`, WAL
+- **Test**: H2 in-memory database with a unique name per context (`jdbc:h2:mem:test-${random.uuid}`)
+- **DDL**: `spring.jpa.hibernate.ddl-auto=none`; `schema.sql` is the single schema source
+- **Init**: idempotent `CREATE TABLE IF NOT EXISTS` + `INSERT OR IGNORE` seed data; `version`/`role` columns are part of the schema
+- **Prod**: `spring.sql.init.mode=never`; schema must exist before startup, and `JWT_SECRET` is mandatory
 
 ## Caching
 
 Caffeine cache: `userCache` and `productCache`, max 1000 entries, 5-minute write expiry.
+`CacheManager` is wrapped in `TransactionAwareCacheManagerProxy`, so `@CachePut`/`@CacheEvict` apply only after commit.
+
+## Security
+
+- JWT claims: `sub` (userId), `username`, `role`; `JwtAuthFilter` maps `role` to `ROLE_ADMIN` / `ROLE_USER`.
+- `@EnableMethodSecurity`; controllers enforce admin-only writes and resource ownership (orders, own profile).
+- `jwt.secret` must be at least 32 bytes. Dev/test provide values; prod requires `JWT_SECRET`.
+- Actuator exposes only `health`/`info`; health details require `ADMIN`.
 
 ## Testing Patterns
 
@@ -144,17 +154,18 @@ Caffeine cache: `userCache` and `productCache`, max 1000 entries, 5-minute write
 - `TestApplication.java` (`@SpringBootApplication`) for test context
 
 ### Controller Integration Tests (MockMvc)
-- `@SpringBootTest` + `@AutoConfigureMockMvc` + `@MockitoBean`
-- Tests HTTP status codes, JSON response structure, error handling
+- `@SpringBootTest` + `@AutoConfigureMockMvc` + `@ActiveProfiles("test")`
+- Service-level controllers use `@MockitoBean`; `SecurityIntegrationTest` / `PartialUpdateIntegrationTest` run the full stack
+- Tests HTTP status codes, JSON response structure, authorization, error handling
 - Located in `app/src/test/java/.../controller/`
 
 ### Performance Tests
-- Gatling in `app/src/test/scala/`, run with `mvn gatling:test -pl app`
+- Gatling (Java DSL) in `app/src/test/java/.../perf/ShoppingMallSimulation.java`, run with `mvn gatling:test -pl app`
 
 ## CI/CD
 
 ### CI (ci.yml)
-Push/PR to main. Runs `mvn clean verify -B` on JDK 21 (Temurin). Codecov upload.
+Push/PR to main. Runs `mvn clean verify -B` on JDK 25 (Temurin). Codecov upload.
 
 ### Release (release.yml)
 Tags `v*`. Builds JAR, creates GitHub Release, publishes to GitHub Packages.
@@ -162,12 +173,13 @@ Tags `v*`. Builds JAR, creates GitHub Release, publishes to GitHub Packages.
 ## Key Configuration Points
 
 - **app/src/main/resources/application.yml** — Main config
-- **app/src/main/resources/application-dev.yml** — Dev profile (debug logging)
-- **app/src/main/resources/application-prod.yml** — Prod profile
+- **app/src/main/resources/application-dev.yml** — Dev profile (debug logging, dev JWT secret)
+- **app/src/main/resources/application-prod.yml** — Prod profile (`JWT_SECRET`, SQL init disabled)
+- **app/src/test/resources/application-test.yml** — App test profile (unique H2, test JWT secret)
 - **domain/src/test/resources/application-test.yml** — Domain test config
 - JPA open-in-view: explicitly disabled
 - API docs: `/swagger-ui.html` via SpringDoc OpenAPI (configured in web module)
-- Actuator: health, info, beans, conditions, env, metrics, mappings
+- Actuator: only `health`, `info`; health details require `ADMIN`
 
 ## Code Standards
 
@@ -176,4 +188,4 @@ Tags `v*`. Builds JAR, creates GitHub Release, publishes to GitHub Packages.
 - **Entities are classes** with JPA annotations, getters/setters
 - **MapStruct** for domain ↔ facade DTO conversion (`domain/mapper/`)
 - **Password encoding** via `spring-security-crypto`
-- **`@Async`** for fire-and-forget operations (event listeners)
+- **`@Async` + `@TransactionalEventListener(AFTER_COMMIT)`** for notifications; events carry immutable `OrderNotification` snapshots, never JPA entities

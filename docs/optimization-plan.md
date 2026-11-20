@@ -88,3 +88,20 @@
   ├── 9. product_id 索引               → schema.sql
   └── 10. 搜索性能留档                 → 文档记录
 ```
+
+---
+
+## 2026-11-20 复审修复
+
+| 优先级 | 问题 | 修复 |
+|:------:|------|------|
+| P0 | 种子商品/订单 `version=NULL`，写操作 500 | `schema.sql` 补 `version`/`role`，`data.sql` 预置 BCrypt 与 `INSERT OR IGNORE` |
+| P0 | `@CachePut` 在提交前写缓存，回滚后脏读 | `TransactionAwareCacheManagerProxy`，写缓存跟随提交 |
+| P0 | 异步事件跨线程使用 JPA 实体 | `OrderNotification` 快照 + `@TransactionalEventListener(AFTER_COMMIT)` |
+| P1 | 只有认证没有授权，默认 JWT 密钥 | USER/ADMIN 角色、资源归属校验、强密钥、收敛 actuator |
+| P1 | 部分更新把未提供字段写成 null | 合并语义 + 邮箱唯一性校验 |
+| P1 | 未知路径/非法 JSON/类型错误落到 500 | 404 / 400 / 409 映射 |
+| P2 | 订单列表 N+1 | `@EntityGraph(user, product)` |
+| P2 | 分页无上限、SQLite 锁竞争 | `@Max(100)`、`busy_timeout=5000`、WAL |
+| P2 | 测试污染 dev 库、硬编码 dev profile | 全部测试使用 test profile + 独立 H2；移除隐式 dev |
+| P2 | 启动时改写密码、schema 漂移 | 删除 `DataInitializer`，schema.sql 幂等，`ddl-auto=none` |

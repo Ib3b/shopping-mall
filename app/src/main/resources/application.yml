@@ -1,17 +1,15 @@
 spring:
   application:
     name: shopping-mall
-  profiles:
-    active: dev
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
 
   datasource:
-    url: jdbc:sqlite:shopping.db
+    url: jdbc:sqlite:shopping.db?busy_timeout=5000&journal_mode=WAL
     driver-class-name: org.sqlite.JDBC
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
-      maximum-pool-size: 3
+      maximum-pool-size: 5
       minimum-idle: 1
       connection-timeout: 60000
       idle-timeout: 600000

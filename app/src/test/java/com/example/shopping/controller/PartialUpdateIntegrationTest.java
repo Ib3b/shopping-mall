@@ -122,6 +122,15 @@ class PartialUpdateIntegrationTest {
     }
 
     @Test
+    void oversizedPageSizeReturns400() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                .get("/api/products?size=101")
+                .header("Authorization", "Bearer " + token))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("INVALID_PARAMETER"));
+    }
+
+    @Test
     void unknownPathReturns404() throws Exception {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
                 .get("/api/does-not-exist")

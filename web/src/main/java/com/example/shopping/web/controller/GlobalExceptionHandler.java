@@ -2,6 +2,7 @@ package com.example.shopping.web.controller;
 
 import com.example.shopping.common.exception.BusinessException;
 import com.example.shopping.facade.dto.ErrorResponse;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -133,6 +134,22 @@ public class GlobalExceptionHandler {
             HttpStatus.BAD_REQUEST.value(),
             "参数错误",
             detail,
+            "INVALID_PARAMETER",
+            null
+        ));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations().stream()
+            .findFirst()
+            .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+            .orElse("请求参数不合法");
+        return ResponseEntity.badRequest().body(new ErrorResponse(
+            LocalDateTime.now().toString(),
+            HttpStatus.BAD_REQUEST.value(),
+            "参数错误",
+            message,
             "INVALID_PARAMETER",
             null
         ));
