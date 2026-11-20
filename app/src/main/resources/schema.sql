@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS product (
 
 CREATE TABLE IF NOT EXISTS orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    product_id INTEGER NOT NULL,
+    user_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
     quantity INTEGER NOT NULL,
     total_price DECIMAL(10,2) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
