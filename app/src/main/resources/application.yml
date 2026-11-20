@@ -33,9 +33,7 @@ spring:
       schema-locations: classpath:schema.sql
       data-locations: classpath:data.sql
 
-  # 缓存配置由 CacheConfig.java 统一管理（Caffeine maximumSize=1000, expireAfterWrite=300s）
-  cache:
-    cache-names: userCache,productCache
+  # 缓存由 CacheConfig.java 统一管理
 
   # 静态资源配置
   web:

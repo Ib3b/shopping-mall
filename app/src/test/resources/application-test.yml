@@ -11,11 +11,6 @@ spring:
       ddl-auto: create-drop
     show-sql: false
   
-  cache:
-    cache-names: userCache,productCache
-    caffeine:
-      spec: maximumSize=100,expireAfterWrite=60s
-  
   sql:
     init:
       mode: never

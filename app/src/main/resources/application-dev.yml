@@ -15,10 +15,6 @@ spring:
     init:
       mode: always
 
-  cache:
-    caffeine:
-      spec: maximumSize=500,expireAfterWrite=300s
-
 logging:
   level:
     com.example.shopping: DEBUG

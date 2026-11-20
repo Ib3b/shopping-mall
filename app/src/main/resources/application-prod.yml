@@ -18,10 +18,6 @@ spring:
     init:
       mode: never
 
-  cache:
-    caffeine:
-      spec: maximumSize=2000,expireAfterWrite=600s
-
 server:
   port: 8080
   shutdown: graceful

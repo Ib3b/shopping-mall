@@ -106,20 +106,6 @@ public class ProductService {
     }
 
     /**
-     * 根据分类获取商品（带缓存）
-     *
-     * @param category 商品分类
-     * @return 商品列表
-     */
-    @Cacheable(value = "productCache", key = "'category:' + #category")
-    public List<ProductResponse> getProductsByCategoryCached(String category) {
-        logger.debug("查询分类商品（未命中缓存）: {}", category);
-        return productRepository.findByCategory(category).stream()
-            .map(this::toResponse)
-            .toList();
-    }
-
-    /**
      * 搜索商品
      *
      * @param keyword 关键词
