@@ -141,6 +141,32 @@ class UserServiceTest {
     }
 
     @Test
+    void shouldKeepUnspecifiedFieldsOnPartialUpdate() {
+        UserRequest request = new UserRequest(null, null, "newpassword");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(passwordEncoder.encode("newpassword")).thenReturn("newEncodedPassword");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserResponse response = userService.updateUser(1L, request);
+
+        assertEquals("testuser", response.username());
+        assertEquals("test@example.com", response.email());
+        verify(passwordEncoder).encode("newpassword");
+    }
+
+    @Test
+    void shouldRejectEmailAlreadyUsedByAnotherUser() {
+        UserRequest request = new UserRequest(null, "other@example.com", null);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.existsByEmail("other@example.com")).thenReturn(true);
+
+        assertThrows(BusinessException.class, () -> userService.updateUser(1L, request));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
     void shouldDeleteUser() {
         when(userRepository.existsById(1L)).thenReturn(true);
 

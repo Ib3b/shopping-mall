@@ -118,6 +118,33 @@ class ProductServiceTest {
     }
 
     @Test
+    void shouldKeepUnspecifiedFieldsOnPartialUpdate() {
+        ProductRequest request = new ProductRequest(
+            null, null, new BigDecimal("123.45"), null, null);
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(testProduct));
+        when(productRepository.save(any(Product.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ProductResponse response = productService.updateProduct(1L, request);
+
+        assertEquals("测试商品", response.name());
+        assertEquals("这是一个测试", response.description());
+        assertEquals(new BigDecimal("123.45"), response.price());
+        assertEquals(100, response.stock());
+        assertEquals("测试分类", response.category());
+    }
+
+    @Test
+    void shouldRejectBlankNameOnPartialUpdate() {
+        ProductRequest request = new ProductRequest("  ", null, null, null, null);
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(testProduct));
+
+        assertThrows(BusinessException.class, () -> productService.updateProduct(1L, request));
+    }
+
+    @Test
     void shouldUpdateStockSuccessfully() {
         when(productRepository.findById(1L)).thenReturn(Optional.of(testProduct));
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));

@@ -142,11 +142,33 @@ public class ProductService {
         Product product = productRepository.findById(id)
             .orElseThrow(() -> new BusinessException("商品不存在"));
 
-        product.setName(request.name());
-        product.setDescription(request.description());
-        product.setPrice(request.price());
-        product.setStock(request.stock());
-        product.setCategory(request.category());
+        if (request.name() != null) {
+            if (request.name().isBlank()) {
+                throw new BusinessException("商品名称不能为空");
+            }
+            product.setName(request.name());
+        }
+        if (request.description() != null) {
+            product.setDescription(request.description());
+        }
+        if (request.price() != null) {
+            if (request.price().signum() <= 0) {
+                throw new BusinessException("价格必须为正数");
+            }
+            product.setPrice(request.price());
+        }
+        if (request.stock() != null) {
+            if (request.stock() < 0) {
+                throw new BusinessException("库存不能为负数");
+            }
+            product.setStock(request.stock());
+        }
+        if (request.category() != null) {
+            if (request.category().isBlank()) {
+                throw new BusinessException("分类不能为空");
+            }
+            product.setCategory(request.category());
+        }
 
         Product saved = productRepository.save(product);
         logger.info("更新商品: {}", saved.getName());

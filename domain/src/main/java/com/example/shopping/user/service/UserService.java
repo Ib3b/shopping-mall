@@ -125,13 +125,28 @@ public class UserService {
         User user = userRepository.findById(id)
             .orElseThrow(() -> new BusinessException("用户不存在"));
 
-        if (!user.getUsername().equals(request.username())
-            && userRepository.existsByUsername(request.username())) {
-            throw new BusinessException("用户名已存在");
+        if (request.username() != null) {
+            if (request.username().isBlank()) {
+                throw new BusinessException("用户名不能为空");
+            }
+            if (!user.getUsername().equals(request.username())
+                && userRepository.existsByUsername(request.username())) {
+                throw new BusinessException("用户名已存在");
+            }
+            user.setUsername(request.username());
         }
 
-        user.setUsername(request.username());
-        user.setEmail(request.email());
+        if (request.email() != null) {
+            if (request.email().isBlank()) {
+                throw new BusinessException("邮箱不能为空");
+            }
+            if (!user.getEmail().equals(request.email())
+                && userRepository.existsByEmail(request.email())) {
+                throw new BusinessException("邮箱已被注册");
+            }
+            user.setEmail(request.email());
+        }
+
         if (request.password() != null && !request.password().isEmpty()) {
             user.setPassword(passwordEncoder.encode(request.password()));
         }
