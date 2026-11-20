@@ -97,7 +97,11 @@ class OrderServiceTest {
         assertEquals(1L, response.id());
         assertEquals(2, response.quantity());
         verify(productService).updateStock(1L, 2);
-        verify(eventPublisher).publishEvent(any(OrderCreatedEvent.class));
+
+        var eventCaptor = org.mockito.ArgumentCaptor.forClass(OrderCreatedEvent.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        assertEquals("test@example.com", eventCaptor.getValue().getNotification().email());
+        assertEquals("Test Product", eventCaptor.getValue().getNotification().productName());
     }
 
     @Test
@@ -185,7 +189,11 @@ class OrderServiceTest {
 
         assertNotNull(response);
         assertEquals("PAID", response.status());
-        verify(eventPublisher).publishEvent(any(OrderStatusChangedEvent.class));
+
+        var eventCaptor = org.mockito.ArgumentCaptor.forClass(OrderStatusChangedEvent.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        assertEquals("PAID", eventCaptor.getValue().getNotification().status());
+        assertEquals("test@example.com", eventCaptor.getValue().getNotification().email());
     }
 
     @Test

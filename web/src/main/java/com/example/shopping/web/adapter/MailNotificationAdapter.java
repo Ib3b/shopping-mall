@@ -1,6 +1,6 @@
 package com.example.shopping.web.adapter;
 
-import com.example.shopping.common.entity.Order;
+import com.example.shopping.order.event.OrderNotification;
 import com.example.shopping.order.port.NotificationSender;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
@@ -9,13 +9,14 @@ import org.springframework.lang.Nullable;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * 邮件通知适配器
  * <p>
  * 实现 {@link NotificationSender} 接口，通过 JavaMailSender 发送邮件通知。
- * 当邮件服务器不可用时，会模拟发送（仅记录日志）。
- * 这是基础设施层的实现，领域层通过接口依赖不直接感知具体实现。
+ * 入参是不可变快照，可安全地在事务提交后的异步线程中使用；
+ * 用户输入在写入 HTML 前会做转义。
  * </p>
  */
 @Component
@@ -30,21 +31,15 @@ public class MailNotificationAdapter implements NotificationSender {
     }
 
     @Override
-    public void sendOrderConfirmation(Order order) {
-        String to = order.getUser().getEmail();
-        String subject = "订单确认 - 订单号: " + order.getId();
-        String content = buildOrderEmailContent(order);
-
-        sendEmail(to, subject, content);
+    public void sendOrderConfirmation(OrderNotification notification) {
+        String subject = "订单确认 - 订单号: " + notification.orderId();
+        sendEmail(notification.email(), subject, buildOrderEmailContent(notification));
     }
 
     @Override
-    public void sendOrderStatusUpdate(Order order) {
-        String to = order.getUser().getEmail();
-        String subject = "订单状态更新 - 订单号: " + order.getId();
-        String content = buildStatusUpdateEmailContent(order);
-
-        sendEmail(to, subject, content);
+    public void sendOrderStatusUpdate(OrderNotification notification) {
+        String subject = "订单状态更新 - 订单号: " + notification.orderId();
+        sendEmail(notification.email(), subject, buildStatusUpdateEmailContent(notification));
     }
 
     private void sendEmail(String to, String subject, String content) {
@@ -72,7 +67,7 @@ public class MailNotificationAdapter implements NotificationSender {
         }
     }
 
-    private String buildOrderEmailContent(Order order) {
+    String buildOrderEmailContent(OrderNotification notification) {
         return String.format("""
             <html>
             <body>
@@ -90,16 +85,16 @@ public class MailNotificationAdapter implements NotificationSender {
             </body>
             </html>
             """,
-            order.getUser().getUsername(),
-            order.getId(),
-            order.getProduct().getName(),
-            order.getQuantity(),
-            order.getTotalPrice(),
-            order.getStatus().getDescription()
+            HtmlUtils.htmlEscape(notification.username()),
+            notification.orderId(),
+            HtmlUtils.htmlEscape(notification.productName()),
+            notification.quantity(),
+            notification.totalPrice(),
+            HtmlUtils.htmlEscape(notification.statusDescription())
         );
     }
 
-    private String buildStatusUpdateEmailContent(Order order) {
+    String buildStatusUpdateEmailContent(OrderNotification notification) {
         return String.format("""
             <html>
             <body>
@@ -114,9 +109,9 @@ public class MailNotificationAdapter implements NotificationSender {
             </body>
             </html>
             """,
-            order.getUser().getUsername(),
-            order.getId(),
-            order.getStatus().getDescription()
+            HtmlUtils.htmlEscape(notification.username()),
+            notification.orderId(),
+            HtmlUtils.htmlEscape(notification.statusDescription())
         );
     }
 }

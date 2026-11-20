@@ -1,18 +1,18 @@
 package com.example.shopping.order.event;
 
-import com.example.shopping.common.entity.Order;
 import com.example.shopping.order.port.NotificationSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * 订单事件监听器
  * <p>
- * 监听订单相关事件，触发相应的邮件通知。
- * 使用观察者模式实现业务逻辑解耦。
+ * 在事务提交后异步发送通知。事件只携带不可变快照，监听器不访问
+ * JPA 实体或懒加载代理，因此不会跨线程使用 Session。
  * </p>
  */
 @Component
@@ -27,35 +27,29 @@ public class OrderEventListener {
     }
 
     /**
-     * 处理订单创建事件
-     * <p>
-     * 异步发送订单确认邮件
-     * </p>
+     * 处理订单创建事件（提交后异步执行）
      *
      * @param event 订单创建事件
      */
     @Async("mailExecutor")
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onOrderCreated(OrderCreatedEvent event) {
-        Order order = event.getOrder();
-        logger.info("收到订单创建事件 - 订单ID: {}", order.getId());
-        notificationSender.sendOrderConfirmation(order);
+        OrderNotification notification = event.getNotification();
+        logger.info("收到订单创建事件 - 订单ID: {}", notification.orderId());
+        notificationSender.sendOrderConfirmation(notification);
     }
 
     /**
-     * 处理订单状态变更事件
-     * <p>
-     * 异步发送状态更新通知邮件
-     * </p>
+     * 处理订单状态变更事件（提交后异步执行）
      *
      * @param event 订单状态变更事件
      */
     @Async("mailExecutor")
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onOrderStatusChanged(OrderStatusChangedEvent event) {
-        Order order = event.getOrder();
+        OrderNotification notification = event.getNotification();
         logger.info("收到订单状态变更事件 - 订单ID: {}, {} -> {}",
-            order.getId(), event.getOldStatus(), event.getNewStatus());
-        notificationSender.sendOrderStatusUpdate(order);
+            notification.orderId(), event.getOldStatus(), event.getNewStatus());
+        notificationSender.sendOrderStatusUpdate(notification);
     }
 }

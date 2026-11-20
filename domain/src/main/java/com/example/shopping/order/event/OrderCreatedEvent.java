@@ -1,7 +1,5 @@
 package com.example.shopping.order.event;
 
-import com.example.shopping.common.entity.Order;
-
 /**
  * 订单创建事件
  * <p>
@@ -10,8 +8,8 @@ import com.example.shopping.common.entity.Order;
  */
 public class OrderCreatedEvent extends OrderEvent {
 
-    public OrderCreatedEvent(Order order) {
-        super(order);
+    public OrderCreatedEvent(OrderNotification notification) {
+        super(notification);
     }
 
     @Override

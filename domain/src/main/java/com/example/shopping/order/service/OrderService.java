@@ -7,6 +7,7 @@ import com.example.shopping.common.entity.Product;
 import com.example.shopping.common.entity.User;
 import com.example.shopping.common.exception.BusinessException;
 import com.example.shopping.order.event.OrderCreatedEvent;
+import com.example.shopping.order.event.OrderNotification;
 import com.example.shopping.order.event.OrderStatusChangedEvent;
 import com.example.shopping.order.state.OrderStateHandlerRegistry;
 import com.example.shopping.product.service.ProductService;
@@ -245,7 +246,7 @@ public class OrderService {
 
         productService.updateStock(request.productId(), request.quantity());
 
-        eventPublisher.publishEvent(new OrderCreatedEvent(saved));
+        eventPublisher.publishEvent(new OrderCreatedEvent(OrderNotification.from(saved)));
 
         logger.info("订单创建成功 - 订单ID: {}", saved.getId());
 
@@ -269,7 +270,8 @@ public class OrderService {
         order.setStatus(newStatus);
         Order saved = orderDataAccessor.saveOrder(order);
 
-        eventPublisher.publishEvent(new OrderStatusChangedEvent(saved, currentStatus, newStatus));
+        eventPublisher.publishEvent(new OrderStatusChangedEvent(
+            OrderNotification.from(saved), currentStatus, newStatus));
 
         logger.info("订单状态更新 - 订单ID: {}, 新状态: {}", orderId, newStatus);
 

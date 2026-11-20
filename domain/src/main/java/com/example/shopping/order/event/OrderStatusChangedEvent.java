@@ -5,7 +5,7 @@ import com.example.shopping.common.entity.Order;
 /**
  * 订单状态变更事件
  * <p>
- * 当订单状态变更后发布此事件，用于触发状态更新通知等后续操作。
+ * 订单状态成功变更后发布，携带不可变快照及变更前后的状态。
  * </p>
  */
 public class OrderStatusChangedEvent extends OrderEvent {
@@ -13,32 +13,24 @@ public class OrderStatusChangedEvent extends OrderEvent {
     private final Order.Status oldStatus;
     private final Order.Status newStatus;
 
-    public OrderStatusChangedEvent(Order order, Order.Status oldStatus, Order.Status newStatus) {
-        super(order);
+    public OrderStatusChangedEvent(OrderNotification notification,
+                                   Order.Status oldStatus,
+                                   Order.Status newStatus) {
+        super(notification);
         this.oldStatus = oldStatus;
         this.newStatus = newStatus;
+    }
+
+    public Order.Status getOldStatus() {
+        return oldStatus;
+    }
+
+    public Order.Status getNewStatus() {
+        return newStatus;
     }
 
     @Override
     public String getEventType() {
         return "ORDER_STATUS_CHANGED";
-    }
-
-    /**
-     * 获取变更前的状态
-     *
-     * @return 旧状态
-     */
-    public Order.Status getOldStatus() {
-        return oldStatus;
-    }
-
-    /**
-     * 获取变更后的状态
-     *
-     * @return 新状态
-     */
-    public Order.Status getNewStatus() {
-        return newStatus;
     }
 }

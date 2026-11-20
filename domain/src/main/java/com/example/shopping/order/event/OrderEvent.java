@@ -1,29 +1,27 @@
 package com.example.shopping.order.event;
 
-import com.example.shopping.common.entity.Order;
-
 /**
  * 订单事件基类
  * <p>
- * 所有订单相关事件的基类，包含订单实体引用。
- * 使用观察者模式实现订单状态变更的通知机制。
+ * 所有订单相关事件的基类。事件只携带不可变快照，不持有 JPA 实体，
+ * 因此可以在事务提交后安全地交给异步监听器使用。
  * </p>
  */
 public abstract class OrderEvent {
 
-    private final Order order;
+    private final OrderNotification notification;
 
-    protected OrderEvent(Order order) {
-        this.order = order;
+    protected OrderEvent(OrderNotification notification) {
+        this.notification = notification;
     }
 
     /**
-     * 获取订单实体
+     * 获取订单通知快照
      *
-     * @return 订单实体
+     * @return 通知快照
      */
-    public Order getOrder() {
-        return order;
+    public OrderNotification getNotification() {
+        return notification;
     }
 
     /**
