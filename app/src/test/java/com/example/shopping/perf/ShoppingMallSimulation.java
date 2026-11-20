@@ -3,7 +3,13 @@ package com.example.shopping.perf;
 import io.gatling.javaapi.core.*;
 import io.gatling.javaapi.http.*;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.*;
@@ -20,10 +26,41 @@ public class ShoppingMallSimulation extends Simulation {
     private static final long[] UIDS = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
     private static final long[] PIDS = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
         21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50};
-    private static final long[] SIDS = {4,10,16,17,18,41,54,58,59,60};
+    private static final long[] SIDS = {4,10,16,17,18,41,43,45,48,50};
     private static final AtomicLong UIDX = new AtomicLong(0);
     private static final AtomicLong PIDX = new AtomicLong(0);
     private static final AtomicLong SIDX = new AtomicLong(0);
+
+    private static final String BASE_URL = "http://localhost:8080";
+    private static final String AUTH_TOKEN = loginAsAdmin();
+
+    /**
+     * 压测前使用种子管理员登录；应用未启动时直接给出明确错误。
+     */
+    private static String loginAsAdmin() {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder(URI.create(BASE_URL + "/api/auth/login"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(
+                    "{\"username\":\"user1\",\"password\":\"password1\"}"))
+                .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                throw new IllegalStateException(
+                    "Admin login failed with HTTP " + response.statusCode() + ": " + response.body());
+            }
+            Matcher matcher = Pattern.compile("\"token\"\\s*:\\s*\"([^\"]+)\"")
+                .matcher(response.body());
+            if (!matcher.find()) {
+                throw new IllegalStateException("Login response has no token: " + response.body());
+            }
+            return matcher.group(1);
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                "Cannot log in to " + BASE_URL + " (start the app with dev profile first)", e);
+        }
+    }
 
     private static long next(long[] arr, AtomicLong idx) {
         return arr[(int)(idx.getAndIncrement() % arr.length)];
@@ -38,9 +75,10 @@ public class ShoppingMallSimulation extends Simulation {
     // ------------------------------------------------------------------
 
     HttpProtocolBuilder http_ = http
-        .baseUrl("http://localhost:8080")
+        .baseUrl(BASE_URL)
         .acceptHeader("application/json")
         .contentTypeHeader("application/json")
+        .header("Authorization", "Bearer " + AUTH_TOKEN)
         .userAgentHeader("Gatling Write Coverage Test")
         .acceptEncodingHeader("gzip, deflate");
 
@@ -79,14 +117,14 @@ public class ShoppingMallSimulation extends Simulation {
             .set("nu", unique("profile")).set("ne", unique("prof") + "@test.com"))
         .exec(http("Create for Update")
             .post("/api/users")
-            .body(StringBody("{\"username\":\"#{nu}\",\"email\":\"#{ne}\",\"password\":\"p\"}"))
+            .body(StringBody("{\"username\":\"#{nu}\",\"email\":\"#{ne}\",\"password\":\"password123\"}"))
             .check(status().is(201), jsonPath("$.id").saveAs("uid")))
         .pause(ofMillis(200), ofMillis(500))
         .exec(session -> session
             .set("nu2", unique("profile2")).set("ne2", unique("prof2") + "@test.com"))
         .exec(http("Update User")
             .put("/api/users/#{uid}")
-            .body(StringBody("{\"username\":\"#{nu2}\",\"email\":\"#{ne2}\",\"password\":\"p2\"}"))
+            .body(StringBody("{\"username\":\"#{nu2}\",\"email\":\"#{ne2}\",\"password\":\"password456\"}"))
             .check(status().is(200), jsonPath("$.username").is("#{nu2}")))
         .pause(ofMillis(200), ofMillis(500))
         .exec(http("Verify Update")
