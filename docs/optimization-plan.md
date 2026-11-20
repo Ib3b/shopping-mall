@@ -102,6 +102,6 @@
 | P1 | 部分更新把未提供字段写成 null | 合并语义 + 邮箱唯一性校验 |
 | P1 | 未知路径/非法 JSON/类型错误落到 500 | 404 / 400 / 409 映射 |
 | P2 | 订单列表 N+1 | `@EntityGraph(user, product)` |
-| P2 | 分页无上限、SQLite 锁竞争 | `@Max(100)`、`busy_timeout=5000`、WAL |
+| P2 | 分页无上限、SQLite 锁竞争 | `@Max(100)`、`busy_timeout=5000`、WAL、写事务 4 次指数退避重试 |
 | P2 | 测试污染 dev 库、硬编码 dev profile | 全部测试使用 test profile + 独立 H2；移除隐式 dev |
 | P2 | 启动时改写密码、schema 漂移 | 删除 `DataInitializer`，schema.sql 幂等，`ddl-auto=none` |

@@ -125,11 +125,11 @@ public class ShoppingMallSimulation extends Simulation {
         .exec(http("Update User")
             .put("/api/users/#{uid}")
             .body(StringBody("{\"username\":\"#{nu2}\",\"email\":\"#{ne2}\",\"password\":\"password456\"}"))
-            .check(status().is(200), jsonPath("$.username").is("#{nu2}")))
+            .check(status().is(200), jsonPath("$.username").is(session -> session.getString("nu2"))))
         .pause(ofMillis(200), ofMillis(500))
         .exec(http("Verify Update")
             .get("/api/users/#{uid}")
-            .check(status().is(200), jsonPath("$.username").is("#{nu2}")));
+            .check(status().is(200), jsonPath("$.username").is(session -> session.getString("nu2"))));
 
     // ------------------------------------------------------------------
     // 4 — Create Order  (100 write users, optimistic-lock contention)
@@ -202,15 +202,15 @@ public class ShoppingMallSimulation extends Simulation {
             .check(status().is(201), jsonPath("$.id").saveAs("cid")))
         .pause(ofMillis(500), ofMillis(1000))
         .exec(http("Get Product").get("/api/products/#{cid}")
-            .check(status().is(200), jsonPath("$.name").is("#{cn}")))
+            .check(status().is(200), jsonPath("$.name").is(session -> session.getString("cn"))))
         .pause(ofMillis(500), ofMillis(1000))
         .exec(http("Update Product")
             .put("/api/products/#{cid}")
             .body(StringBody("{\"name\":\"#{cn2}\",\"description\":\"upd\",\"price\":199.99,\"stock\":50,\"category\":\"perf-test\"}"))
-            .check(status().is(200), jsonPath("$.name").is("#{cn2}")))
+            .check(status().is(200), jsonPath("$.name").is(session -> session.getString("cn2"))))
         .pause(ofMillis(500), ofMillis(1000))
         .exec(http("Verify Cache").get("/api/products/#{cid}")
-            .check(status().is(200), jsonPath("$.name").is("#{cn2}"), jsonPath("$.price").is("199.99")))
+            .check(status().is(200), jsonPath("$.name").is(session -> session.getString("cn2")), jsonPath("$.price").is("199.99")))
         .pause(ofMillis(500), ofMillis(1000))
         .exec(http("Delete Product").delete("/api/products/#{cid}")
             .check(status().is(204)));

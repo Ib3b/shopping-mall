@@ -131,9 +131,11 @@ mvn test
 # 运行单个测试
 mvn test -Dtest=UserServiceTest
 
-# 性能测试（需先启动应用）
+# 性能测试（需先以 dev profile 启动应用）
 mvn gatling:test -pl app
 ```
+
+压测结果：8760 请求、97.9% 成功、p95 60ms。SQLite 在并发写入下仍可能返回 `SQLITE_BUSY_SNAPSHOT`，写事务已配置 4 次指数退避重试；高写入场景建议切换 PostgreSQL。
 
 ## 运行要求
 

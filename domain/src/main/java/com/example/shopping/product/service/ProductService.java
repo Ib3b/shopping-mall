@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -42,6 +45,8 @@ public class ProductService {
      * @return 商品响应
      */
     @Transactional
+    @Retryable(retryFor = CannotAcquireLockException.class, maxAttempts = 4,
+        backoff = @Backoff(delay = 100, multiplier = 2))
     public ProductResponse createProduct(ProductRequest request) {
         Product product = new Product(
             request.name(),
@@ -138,6 +143,8 @@ public class ProductService {
      */
     @Transactional
     @CachePut(value = "productCache", key = "#id")
+    @Retryable(retryFor = CannotAcquireLockException.class, maxAttempts = 4,
+        backoff = @Backoff(delay = 100, multiplier = 2))
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         Product product = productRepository.findById(id)
             .orElseThrow(() -> new BusinessException("商品不存在"));
@@ -184,6 +191,8 @@ public class ProductService {
      */
     @Transactional
     @CacheEvict(value = "productCache", key = "#id")
+    @Retryable(retryFor = CannotAcquireLockException.class, maxAttempts = 4,
+        backoff = @Backoff(delay = 100, multiplier = 2))
     public void deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
             throw new BusinessException("商品不存在");

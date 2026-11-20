@@ -65,6 +65,12 @@
             <artifactId>spring-security-crypto</artifactId>
         </dependency>
 
+        <!-- Retry SQLite write-lock conflicts -->
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+
         <!-- MapStruct -->
         <dependency>
             <groupId>org.mapstruct</groupId>

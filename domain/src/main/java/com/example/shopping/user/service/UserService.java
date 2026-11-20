@@ -9,6 +9,9 @@ import com.example.shopping.common.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,6 +49,8 @@ public class UserService {
      * @throws BusinessException 当用户名或邮箱已存在时抛出
      */
     @Transactional
+    @Retryable(retryFor = CannotAcquireLockException.class, maxAttempts = 4,
+        backoff = @Backoff(delay = 100, multiplier = 2))
     public UserResponse createUser(UserRequest request) {
         if (userRepository.existsByUsername(request.username())) {
             throw new BusinessException("用户名已存在");
@@ -121,6 +126,8 @@ public class UserService {
      */
     @Transactional
     @CacheEvict(value = "userCache", key = "#id")
+    @Retryable(retryFor = CannotAcquireLockException.class, maxAttempts = 4,
+        backoff = @Backoff(delay = 100, multiplier = 2))
     public UserResponse updateUser(Long id, UserRequest request) {
         User user = userRepository.findById(id)
             .orElseThrow(() -> new BusinessException("用户不存在"));
@@ -165,6 +172,8 @@ public class UserService {
      */
     @Transactional
     @CacheEvict(value = "userCache", key = "#id")
+    @Retryable(retryFor = CannotAcquireLockException.class, maxAttempts = 4,
+        backoff = @Backoff(delay = 100, multiplier = 2))
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new BusinessException("用户不存在");

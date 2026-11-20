@@ -126,6 +126,7 @@ Uses Spring's `ApplicationEventPublisher` to fire `OrderCreatedEvent` and `Order
 ## Database
 
 - **Runtime**: SQLite via Hibernate `SQLiteDialect`, HikariCP pool size 5, `busy_timeout=5000`, WAL
+- **Write contention**: write services retry `CannotAcquireLockException` 4 times with exponential backoff (outer retry advice); production should prefer PostgreSQL under high write concurrency
 - **Test**: H2 in-memory database with a unique name per context (`jdbc:h2:mem:test-${random.uuid}`)
 - **DDL**: `spring.jpa.hibernate.ddl-auto=none`; `schema.sql` is the single schema source
 - **Init**: idempotent `CREATE TABLE IF NOT EXISTS` + `INSERT OR IGNORE` seed data; `version`/`role` columns are part of the schema

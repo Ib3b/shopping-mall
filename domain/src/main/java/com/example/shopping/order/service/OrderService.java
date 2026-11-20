@@ -14,7 +14,10 @@ import com.example.shopping.product.service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -147,6 +150,8 @@ public class OrderService {
      * @return 订单响应
      * @throws BusinessException 当重试耗尽或用户/商品不存在/库存不足时抛出
      */
+    @Retryable(retryFor = CannotAcquireLockException.class, maxAttempts = 4,
+        backoff = @Backoff(delay = 100, multiplier = 2))
     public OrderResponse createOrder(OrderRequest request) {
         return retryOnOptimisticLocking(() ->
             transactionTemplate.execute(status -> createOrderInternal(request)));
@@ -164,6 +169,8 @@ public class OrderService {
      * @return 订单响应
      * @throws BusinessException 当重试耗尽、订单不存在或状态转换不合法时抛出
      */
+    @Retryable(retryFor = CannotAcquireLockException.class, maxAttempts = 4,
+        backoff = @Backoff(delay = 100, multiplier = 2))
     public OrderResponse updateOrderStatus(Long orderId, Order.Status newStatus) {
         return retryOnOptimisticLocking(() ->
             transactionTemplate.execute(status -> updateOrderStatusInternal(orderId, newStatus)));
@@ -175,6 +182,8 @@ public class OrderService {
      * @param orderId 订单ID
      * @throws BusinessException 当重试耗尽、订单不存在或无法取消时抛出
      */
+    @Retryable(retryFor = CannotAcquireLockException.class, maxAttempts = 4,
+        backoff = @Backoff(delay = 100, multiplier = 2))
     public void cancelOrder(Long orderId) {
         retryOnOptimisticLocking(() -> {
             transactionTemplate.execute(status -> {
