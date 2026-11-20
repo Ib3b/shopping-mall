@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@WithMockUser
+@ActiveProfiles("test")
 class OrderControllerTest {
 
     @Autowired
@@ -52,6 +52,7 @@ class OrderControllerTest {
         when(orderRpcService.createOrder(any(OrderCreateRequest.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/orders")
+                .with(TestAuth.admin(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isCreated())
@@ -66,7 +67,7 @@ class OrderControllerTest {
 
         when(orderRpcService.getOrderById(1L)).thenReturn(response);
 
-        mockMvc.perform(get("/api/orders/1"))
+        mockMvc.perform(get("/api/orders/1").with(TestAuth.admin(1L)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(1))
             .andExpect(jsonPath("$.status").value("PENDING"));
@@ -79,7 +80,7 @@ class OrderControllerTest {
 
         when(orderRpcService.getOrdersByUserId(1L)).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/api/orders/user/1"))
+        mockMvc.perform(get("/api/orders/user/1").with(TestAuth.admin(1L)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(1));
     }
@@ -94,7 +95,7 @@ class OrderControllerTest {
         PageDTO<OrderDTO> page = new PageDTO<>(List.of(order1, order2), 0, 10, 2, 1, true, true);
         when(orderRpcService.getAllOrders(anyInt(), anyInt())).thenReturn(page);
 
-        mockMvc.perform(get("/api/orders"))
+        mockMvc.perform(get("/api/orders").with(TestAuth.admin(1L)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content.length()").value(2));
     }
@@ -107,6 +108,7 @@ class OrderControllerTest {
         when(orderRpcService.updateOrderStatus(1L, OrderStatus.PAID)).thenReturn(response);
 
         mockMvc.perform(put("/api/orders/1/status")
+                .with(TestAuth.admin(1L))
                 .param("status", "PAID"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("PAID"));
@@ -120,7 +122,7 @@ class OrderControllerTest {
         doNothing().when(orderRpcService).cancelOrder(1L);
         when(orderRpcService.getOrderById(1L)).thenReturn(response);
 
-        mockMvc.perform(post("/api/orders/1/cancel"))
+        mockMvc.perform(post("/api/orders/1/cancel").with(TestAuth.admin(1L)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("CANCELLED"));
     }
@@ -129,7 +131,7 @@ class OrderControllerTest {
     void shouldGetUserOrderCount() throws Exception {
         when(orderRpcService.getUserOrderCount(1L)).thenReturn(5L);
 
-        mockMvc.perform(get("/api/orders/user/1/count"))
+        mockMvc.perform(get("/api/orders/user/1/count").with(TestAuth.admin(1L)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").value(5));
     }

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +39,7 @@ public class ProductController {
      * @return 创建的商品
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "创建商品", description = "添加新商品")
     public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductCreateRequest request) {
         ProductDTO response = productRpcService.createProduct(request);
@@ -121,6 +123,7 @@ public class ProductController {
      * @return 更新后的商品
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "更新商品", description = "更新商品信息")
     public ResponseEntity<ProductDTO> updateProduct(
             @PathVariable Long id,
@@ -136,6 +139,7 @@ public class ProductController {
      * @return 无内容响应
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "删除商品", description = "根据ID删除商品")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productRpcService.deleteProduct(id);

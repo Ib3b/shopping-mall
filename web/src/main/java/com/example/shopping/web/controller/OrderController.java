@@ -5,10 +5,12 @@ import com.example.shopping.facade.dto.OrderCreateRequest;
 import com.example.shopping.facade.dto.OrderDTO;
 import com.example.shopping.facade.dto.PageDTO;
 import com.example.shopping.facade.enums.OrderStatus;
+import com.example.shopping.web.config.CurrentUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,9 +28,11 @@ import java.util.List;
 public class OrderController {
 
     private final OrderRpcService orderRpcService;
+    private final CurrentUser currentUser;
 
-    public OrderController(OrderRpcService orderRpcService) {
+    public OrderController(OrderRpcService orderRpcService, CurrentUser currentUser) {
         this.orderRpcService = orderRpcService;
+        this.currentUser = currentUser;
     }
 
     /**
@@ -40,6 +44,7 @@ public class OrderController {
     @PostMapping
     @Operation(summary = "创建订单", description = "创建新订单并扣减库存")
     public ResponseEntity<OrderDTO> createOrder(@Valid @RequestBody OrderCreateRequest request) {
+        currentUser.requireSelfOrAdmin(request.userId());
         OrderDTO response = orderRpcService.createOrder(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -54,6 +59,7 @@ public class OrderController {
     @Operation(summary = "获取订单", description = "根据ID获取订单详情")
     public ResponseEntity<OrderDTO> getOrderById(@PathVariable Long id) {
         OrderDTO response = orderRpcService.getOrderById(id);
+        currentUser.requireSelfOrAdmin(response.userId());
         return ResponseEntity.ok(response);
     }
 
@@ -65,6 +71,7 @@ public class OrderController {
      * @return 订单分页列表
      */
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "获取所有订单", description = "分页获取订单列表")
     public ResponseEntity<PageDTO<OrderDTO>> getAllOrders(
             @RequestParam(defaultValue = "0") int page,
@@ -82,6 +89,7 @@ public class OrderController {
     @GetMapping("/user/{userId}")
     @Operation(summary = "获取用户订单", description = "获取指定用户的订单列表")
     public ResponseEntity<List<OrderDTO>> getOrdersByUserId(@PathVariable Long userId) {
+        currentUser.requireSelfOrAdmin(userId);
         List<OrderDTO> orders = orderRpcService.getOrdersByUserId(userId);
         return ResponseEntity.ok(orders);
     }
@@ -93,6 +101,7 @@ public class OrderController {
      * @return 订单列表
      */
     @GetMapping("/status/{status}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "根据状态查询", description = "获取指定状态的订单列表")
     public ResponseEntity<List<OrderDTO>> getOrdersByStatus(@PathVariable OrderStatus status) {
         List<OrderDTO> orders = orderRpcService.getOrdersByStatus(status);
@@ -107,6 +116,7 @@ public class OrderController {
      * @return 更新后的订单
      */
     @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "更新订单状态", description = "更新订单状态")
     public ResponseEntity<OrderDTO> updateOrderStatus(
             @PathVariable Long id,
@@ -124,9 +134,10 @@ public class OrderController {
     @PostMapping("/{id}/cancel")
     @Operation(summary = "取消订单", description = "取消订单并恢复库存")
     public ResponseEntity<OrderDTO> cancelOrder(@PathVariable Long id) {
+        OrderDTO existing = orderRpcService.getOrderById(id);
+        currentUser.requireSelfOrAdmin(existing.userId());
         orderRpcService.cancelOrder(id);
-        OrderDTO response = orderRpcService.getOrderById(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(orderRpcService.getOrderById(id));
     }
 
     /**
@@ -138,6 +149,7 @@ public class OrderController {
     @GetMapping("/user/{userId}/count")
     @Operation(summary = "用户订单数量", description = "获取用户订单数量")
     public ResponseEntity<Long> getUserOrderCount(@PathVariable Long userId) {
+        currentUser.requireSelfOrAdmin(userId);
         Long count = orderRpcService.getUserOrderCount(userId);
         return ResponseEntity.ok(count);
     }

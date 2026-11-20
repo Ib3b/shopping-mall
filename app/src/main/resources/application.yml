@@ -3,6 +3,8 @@ spring:
     name: shopping-mall
   profiles:
     active: dev
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
 
   datasource:
     url: jdbc:sqlite:shopping.db
@@ -52,11 +54,12 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,beans,conditions,env,metrics,mappings
+        include: health,info
       base-path: /actuator
   endpoint:
     health:
-      show-details: always
+      show-details: when_authorized
+      roles: ADMIN
 
 springdoc:
   api-docs:

@@ -1,16 +1,19 @@
 package com.example.shopping.controller;
 
 import com.example.shopping.common.entity.User;
+import com.example.shopping.common.repository.OrderRepository;
+import com.example.shopping.common.repository.ProductRepository;
 import com.example.shopping.common.repository.UserRepository;
 import com.example.shopping.facade.dto.LoginRequest;
 import com.example.shopping.facade.dto.UserCreateRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.cache.CacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -32,6 +35,28 @@ class UserIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private CacheManager cacheManager;
+
+    @BeforeEach
+    void cleanState() {
+        orderRepository.deleteAll();
+        productRepository.deleteAll();
+        userRepository.deleteAll();
+        cacheManager.getCacheNames().forEach(name -> {
+            var cache = cacheManager.getCache(name);
+            if (cache != null) {
+                cache.clear();
+            }
+        });
+    }
 
     @Test
     void shouldRegisterAndLoginUser() throws Exception {
@@ -66,11 +91,11 @@ class UserIntegrationTest {
     }
 
     @Test
-    @WithMockUser
     void shouldRegisterViaUserEndpointAndVerify() throws Exception {
         UserCreateRequest req = new UserCreateRequest("inttest_user2", "inttest2@test.com", "password456");
 
         String responseJson = mockMvc.perform(post("/api/users")
+                .with(TestAuth.admin(1L))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isCreated())
@@ -80,7 +105,7 @@ class UserIntegrationTest {
         assertTrue(responseJson.contains("inttest_user2"));
 
         // Verify via GET
-        mockMvc.perform(get("/api/users/username/inttest_user2"))
+        mockMvc.perform(get("/api/users/username/inttest_user2").with(TestAuth.admin(1L)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.username").value("inttest_user2"));
     }

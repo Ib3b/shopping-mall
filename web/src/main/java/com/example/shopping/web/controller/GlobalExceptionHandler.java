@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -65,6 +66,19 @@ public class GlobalExceptionHandler {
             "参数错误",
             ex.getMessage(),
             "ILLEGAL_ARGUMENT",
+            null
+        ));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
+        logger.warn("访问被拒绝: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(
+            LocalDateTime.now().toString(),
+            HttpStatus.FORBIDDEN.value(),
+            "禁止访问",
+            "无权访问该资源",
+            "ACCESS_DENIED",
             null
         ));
     }

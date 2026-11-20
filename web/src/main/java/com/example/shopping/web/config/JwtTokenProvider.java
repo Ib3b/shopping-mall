@@ -1,5 +1,6 @@
 package com.example.shopping.web.config;
 
+import com.example.shopping.common.security.TokenClaims;
 import com.example.shopping.common.security.TokenProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -19,22 +20,30 @@ public class JwtTokenProvider implements TokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
+    private static final int MIN_SECRET_BYTES = 32;
+
     private final SecretKey key;
     private final long expirationMs;
 
     public JwtTokenProvider(
-            @Value("${jwt.secret:changeit-this-must-be-at-least-256-bits-long-for-hs256}") String secret,
+            @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration-ms:86400000}") long expirationMs) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
+        if (secretBytes.length < MIN_SECRET_BYTES) {
+            throw new IllegalStateException(
+                "jwt.secret must be at least " + MIN_SECRET_BYTES + " bytes; configure it via environment");
+        }
+        this.key = Keys.hmacShaKeyFor(secretBytes);
         this.expirationMs = expirationMs;
     }
 
     @Override
-    public String createToken(Long userId, String username) {
+    public String createToken(Long userId, String username, String role) {
         Date now = new Date();
         return Jwts.builder()
             .subject(userId.toString())
             .claim("username", username)
+            .claim("role", role)
             .issuedAt(now)
             .expiration(new Date(now.getTime() + expirationMs))
             .signWith(key)
@@ -42,22 +51,19 @@ public class JwtTokenProvider implements TokenProvider {
     }
 
     @Override
-    public Long getUserIdFromToken(String token) {
+    public TokenClaims parseToken(String token) {
         try {
             Claims claims = Jwts.parser()
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-            return Long.parseLong(claims.getSubject());
-        } catch (JwtException e) {
+            Long userId = Long.parseLong(claims.getSubject());
+            String role = claims.get("role", String.class);
+            return new TokenClaims(userId, role == null ? "USER" : role);
+        } catch (JwtException | IllegalArgumentException e) {
             logger.warn("Invalid JWT token: {}", e.getMessage());
             return null;
         }
-    }
-
-    @Override
-    public boolean validateToken(String token) {
-        return getUserIdFromToken(token) != null;
     }
 }

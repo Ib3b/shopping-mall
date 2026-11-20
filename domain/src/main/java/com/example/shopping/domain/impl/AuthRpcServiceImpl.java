@@ -1,5 +1,6 @@
 package com.example.shopping.domain.impl;
 
+import com.example.shopping.common.dto.AuthenticatedUser;
 import com.example.shopping.common.dto.UserRequest;
 import com.example.shopping.common.dto.UserResponse;
 import com.example.shopping.common.security.TokenProvider;
@@ -30,8 +31,8 @@ public class AuthRpcServiceImpl implements AuthRpcService {
 
     @Override
     public String login(String username, String password) {
-        Long userId = userService.verifyCredentials(username, password);
-        String token = tokenProvider.createToken(userId, username);
+        AuthenticatedUser user = userService.authenticate(username, password);
+        String token = tokenProvider.createToken(user.id(), user.username(), user.role().name());
         logger.info("[RPC] login - user: {}", username);
         return token;
     }
@@ -40,7 +41,8 @@ public class AuthRpcServiceImpl implements AuthRpcService {
     public String register(UserCreateRequest request) {
         UserRequest userRequest = new UserRequest(request.username(), request.email(), request.password());
         UserResponse response = userService.createUser(userRequest);
-        String token = tokenProvider.createToken(response.id(), response.username());
+        String token = tokenProvider.createToken(
+            response.id(), response.username(), response.role().name());
         logger.info("[RPC] register - user: {}", response.username());
         return token;
     }

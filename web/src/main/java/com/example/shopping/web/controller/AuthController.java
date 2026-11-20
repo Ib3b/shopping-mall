@@ -1,5 +1,6 @@
 package com.example.shopping.web.controller;
 
+import com.example.shopping.common.security.TokenClaims;
 import com.example.shopping.common.security.TokenProvider;
 import com.example.shopping.facade.AuthRpcService;
 import com.example.shopping.facade.dto.LoginRequest;
@@ -31,8 +32,8 @@ public class AuthController {
     @Operation(summary = "用户登录", description = "验证用户名密码并返回 JWT token")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         String token = authRpcService.login(request.username(), request.password());
-        Long userId = tokenProvider.getUserIdFromToken(token);
-        UserDTO user = authRpcService.getCurrentUser(userId);
+        TokenClaims claims = tokenProvider.parseToken(token);
+        UserDTO user = authRpcService.getCurrentUser(claims.userId());
         return ResponseEntity.ok(new LoginResponse(token, user));
     }
 
@@ -40,8 +41,8 @@ public class AuthController {
     @Operation(summary = "用户注册", description = "注册新用户并返回 JWT token")
     public ResponseEntity<LoginResponse> register(@Valid @RequestBody UserCreateRequest request) {
         String token = authRpcService.register(request);
-        Long userId = tokenProvider.getUserIdFromToken(token);
-        UserDTO user = authRpcService.getCurrentUser(userId);
+        TokenClaims claims = tokenProvider.parseToken(token);
+        UserDTO user = authRpcService.getCurrentUser(claims.userId());
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(new LoginResponse(token, user));
     }

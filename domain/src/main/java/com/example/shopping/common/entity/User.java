@@ -22,6 +22,14 @@ import java.util.Objects;
 @EntityListeners(AuditingEntityListener.class)
 public class User {
 
+    /**
+     * 用户角色
+     */
+    public enum Role {
+        USER,
+        ADMIN
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,6 +48,10 @@ public class User {
     @Size(min = 6, max = 100, message = "密码长度必须在6-100之间")
     @Column(nullable = false, length = 255)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Role role = Role.USER;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)
@@ -118,6 +130,19 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    /**
+     * 获取用户角色
+     *
+     * @return 用户角色
+     */
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     /**

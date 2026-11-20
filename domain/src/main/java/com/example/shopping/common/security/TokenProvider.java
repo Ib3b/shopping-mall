@@ -11,23 +11,16 @@ public interface TokenProvider {
      *
      * @param userId   user ID
      * @param username username
+     * @param role     role name (USER / ADMIN)
      * @return signed JWT token string
      */
-    String createToken(Long userId, String username);
+    String createToken(Long userId, String username, String role);
 
     /**
-     * Extract user ID from a valid token.
+     * Parse and validate a token in one pass.
      *
      * @param token JWT token string
-     * @return user ID, or null if token is invalid/expired
+     * @return claims, or {@code null} if the token is invalid/expired
      */
-    Long getUserIdFromToken(String token);
-
-    /**
-     * Validate a token string.
-     *
-     * @param token JWT token string
-     * @return true if valid, false otherwise
-     */
-    boolean validateToken(String token);
+    TokenClaims parseToken(String token);
 }

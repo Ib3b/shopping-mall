@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +37,7 @@ public class UserController {
      * @return 创建的用户
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "用户注册", description = "创建新用户")
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateRequest request) {
         UserDTO response = userRpcService.createUser(request);
@@ -49,6 +51,7 @@ public class UserController {
      * @return 用户信息
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "获取用户", description = "根据ID获取用户信息")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         UserDTO response = userRpcService.getUserById(id);
@@ -63,6 +66,7 @@ public class UserController {
      * @return 用户分页列表
      */
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "获取所有用户", description = "分页获取用户列表")
     public ResponseEntity<PageDTO<UserDTO>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
@@ -78,6 +82,7 @@ public class UserController {
      * @return 用户信息
      */
     @GetMapping("/username/{username}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "根据用户名查询", description = "根据用户名获取用户信息")
     public ResponseEntity<UserDTO> getUserByUsername(@PathVariable String username) {
         UserDTO response = userRpcService.getUserByUsername(username);
@@ -92,6 +97,7 @@ public class UserController {
      * @return 更新后的用户
      */
     @PutMapping("/{id}")
+    @PreAuthorize("#id == authentication.principal or hasRole('ADMIN')")
     @Operation(summary = "更新用户", description = "更新用户信息")
     public ResponseEntity<UserDTO> updateUser(
             @PathVariable Long id,
@@ -107,6 +113,7 @@ public class UserController {
      * @return 无内容响应
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "删除用户", description = "根据ID删除用户")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userRpcService.deleteUser(id);

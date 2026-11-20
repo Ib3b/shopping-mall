@@ -1,6 +1,7 @@
 package com.example.shopping.controller;
 
 import com.example.shopping.common.exception.BusinessException;
+import com.example.shopping.common.security.TokenClaims;
 import com.example.shopping.common.security.TokenProvider;
 import com.example.shopping.facade.AuthRpcService;
 import com.example.shopping.facade.dto.LoginRequest;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -25,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class AuthControllerTest {
 
     @Autowired
@@ -42,7 +45,7 @@ class AuthControllerTest {
     @Test
     void shouldReturnTokenOnLogin() throws Exception {
         when(authRpcService.login("testuser", "password123")).thenReturn("jwt-token-abc");
-        when(tokenProvider.getUserIdFromToken("jwt-token-abc")).thenReturn(1L);
+        when(tokenProvider.parseToken("jwt-token-abc")).thenReturn(new TokenClaims(1L, "USER"));
         when(authRpcService.getCurrentUser(1L))
             .thenReturn(new UserDTO(1L, "testuser", "test@example.com", LocalDateTime.now()));
 
@@ -72,7 +75,7 @@ class AuthControllerTest {
     @Test
     void shouldReturnTokenOnRegister() throws Exception {
         when(authRpcService.register(any(UserCreateRequest.class))).thenReturn("jwt-token-xyz");
-        when(tokenProvider.getUserIdFromToken("jwt-token-xyz")).thenReturn(2L);
+        when(tokenProvider.parseToken("jwt-token-xyz")).thenReturn(new TokenClaims(2L, "USER"));
         when(authRpcService.getCurrentUser(2L))
             .thenReturn(new UserDTO(2L, "newuser", "new@test.com", LocalDateTime.now()));
 

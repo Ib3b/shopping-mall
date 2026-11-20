@@ -1,5 +1,6 @@
 package com.example.shopping.user.service;
 
+import com.example.shopping.common.dto.AuthenticatedUser;
 import com.example.shopping.common.dto.UserRequest;
 import com.example.shopping.common.dto.UserResponse;
 import com.example.shopping.common.entity.User;
@@ -160,18 +161,18 @@ public class UserService {
     /**
      * 验证用户凭证
      *
-     * @param username 用户名
+     * @param username    用户名
      * @param rawPassword 明文密码
-     * @return 用户ID
+     * @return 认证成功的用户信息（含角色）
      * @throws BusinessException 当用户不存在或密码不匹配时抛出
      */
-    public Long verifyCredentials(String username, String rawPassword) {
+    public AuthenticatedUser authenticate(String username, String rawPassword) {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new BusinessException("用户名或密码错误"));
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             throw new BusinessException("用户名或密码错误");
         }
-        return user.getId();
+        return new AuthenticatedUser(user.getId(), user.getUsername(), user.getRole());
     }
 
     /**
@@ -185,6 +186,7 @@ public class UserService {
             user.getId(),
             user.getUsername(),
             user.getEmail(),
+            user.getRole(),
             user.getCreatedAt()
         );
     }
